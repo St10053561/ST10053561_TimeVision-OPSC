@@ -16,8 +16,5 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        //git feaatures
-
-        //this is just for testing
     }
 }

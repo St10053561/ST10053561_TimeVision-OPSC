@@ -2,6 +2,7 @@ package com.example.timevision_application
 
 import Project
 import android.os.Bundle
+import android.view.View
 import android.widget.TableLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        // Hide the status bar.
+        supportActionBar?.hide()
+
+        // Hide both the navigation bar and the status bar.
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN or
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 
         //initialize the table layout values
         val projects = listOf(

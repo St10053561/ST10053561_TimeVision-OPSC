@@ -26,8 +26,9 @@ class MainActivity : AppCompatActivity() {
             Project("Project 2", "Category 2"),
             Project("Project 3", "Category 3"),
             Project("Project 4", "Category 4"),
-            Project("Project 5", "Category 5"),
-            Project("Project 6", "Category 6")
+            Project("Project 5", "Category 5")
+
+
 
         )
 

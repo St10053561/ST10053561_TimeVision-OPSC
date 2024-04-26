@@ -1,13 +1,11 @@
 package com.example.timevision_application
 
-import Project
 import android.os.Bundle
 import android.view.View
-import android.widget.TableLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,16 +20,28 @@ class MainActivity : AppCompatActivity() {
         window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN or
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 
-        //initialize the table layout values
-        val projects = listOf(
-            Project("Project 1", "Category 1", "01/01/2021", "Status 1", "StartEnd 1", 1.0f, 1, 1, "Photo 1"),
-            Project("Project 2", "Category 2", "02/02/2022", "Status 2", "StartEnd 2", 2.0f, 2, 2, "Photo 2"),
-            Project("Project 3", "Category 3", "03/03/2023", "Status 3", "StartEnd 3", 3.0f, 3, 3, "Photo 3")
+        // Create a list of Project objects. Each Project has a name and a category.
+        val projectList = listOf(
+            Project("Project 1", "Category 1"),
+            Project("Project 2", "Category 2"),
+            Project("Project 3", "Category 3"),
+            Project("Project 4", "Category 4"),
+            Project("Project 5", "Category 5"),
+            Project("Project 6", "Category 6")
+
         )
 
-        val tableLayout = findViewById<TableLayout>(R.id.tableLayout)
-        val tableManager = TableManager(this, tableLayout)
-        tableManager.populateTable(projects)
+// Get the RecyclerView from the layout
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
+
+// Set the adapter for the RecyclerView to a new ProjectAdapter, which will handle displaying the projects
+        recyclerView.adapter = ProjectAdapter(projectList)
+
+// Set the layout manager for the RecyclerView to a LinearLayoutManager, which will arrange the items in a vertical list
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+// Set the RecyclerView to have a fixed size for performance optimization, as the size of the RecyclerView doesn't change with its content
+        recyclerView.setHasFixedSize(true)
 
 
     }

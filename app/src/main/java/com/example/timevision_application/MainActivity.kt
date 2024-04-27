@@ -1,11 +1,13 @@
 package com.example.timevision_application
 
+import Project
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,17 +22,7 @@ class MainActivity : AppCompatActivity() {
         window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN or
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 
-        // Create a list of Project objects. Each Project has a name and a category.
-        val projectList = listOf(
-            Project("Project 1", "Category 1"),
-            Project("Project 2", "Category 2"),
-            Project("Project 3", "Category 3"),
-            Project("Project 4", "Category 4"),
-            Project("Project 5", "Category 5")
-
-
-
-        )
+        val projectList = DumyData()
 
 // Get the RecyclerView from the layout
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
@@ -44,6 +36,61 @@ class MainActivity : AppCompatActivity() {
 // Set the RecyclerView to have a fixed size for performance optimization, as the size of the RecyclerView doesn't change with its content
         recyclerView.setHasFixedSize(true)
 
+    }
 
+    private fun DumyData(): List<Project> {
+        val projectList = listOf(
+            Project(
+                "Project Alpha",
+                "Software Development",
+                "This is a software development project",
+                2,
+                8,
+                "Photo 1",
+                "2023-01-01",
+                List(7) { Random.nextInt(2 ,8) }
+            ),
+            Project(
+                "Project Beta",
+                "Marketing",
+                "This is a marketing project",
+                3,
+                10,
+                "Photo 2",
+                "2023-02-01",
+                List(7) { Random.nextInt(3 ,10) }
+            ),
+            Project(
+                "Project Gamma",
+                "Product Development",
+                "This is a product development project",
+                20,
+                40,
+                "Photo 3",
+                "2023-03-01",
+                List(7) { Random.nextInt(3 ,10) }
+            ),
+            Project(
+                "Project Delta",
+                "Human Resource",
+                "This is a human resource project",
+                25,
+                50,
+                "Photo 4",
+                "2023-04-01",
+                List(7) { Random.nextInt(3 ,10) }
+            ),
+            Project(
+                "Project Epsilon",
+                "Operations",
+                "This is an operations project",
+                30,
+                60,
+                "Photo 5",
+                "2023-05-01",
+                List(7) { Random.nextInt(3 ,10) }
+            )
+        )
+        return projectList
     }
 }

@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/cardView"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="20dp"
-    android:layout_marginEnd="16dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="8dp"
-    app:layout_constraintTop_toTopOf="parent">
+    android:layout_height="match_parent"
+    android:paddingTop="?attr/actionBarSize">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,49 +22,40 @@
             android:id="@+id/projectCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:text="Project Category"
             android:textSize="16sp" />
-
 
         <TextView
             android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Description"
-            android:textSize="16sp"
-            android:visibility="gone" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/hours"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hours"
-            android:textSize="16sp"
-            android:visibility="gone" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/userPhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Photo"
-            android:visibility="gone" />
+            android:text="User Photo"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/projectDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Date"
-            android:textSize="16sp"
-            android:visibility="gone" />
+            android:text="Project Date"
+            android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/viewDetailsButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="View Details" />
+
+
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+</ScrollView>

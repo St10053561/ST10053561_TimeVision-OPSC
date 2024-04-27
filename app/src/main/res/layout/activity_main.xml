@@ -17,37 +17,59 @@
         android:orientation="vertical">
 
         <ImageView
+            android:id="@+id/logo"
+            android:layout_width="80dp"
+            android:layout_height="70dp"
+            android:layout_gravity="start|top"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_time_vision_logo_remove" />
+
+        <ImageView
             android:layout_width="160dp"
             android:layout_height="160dp"
             android:src="@drawable/icon_account_circle"/>
 
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:hint="Username"
-            android:drawableStart="@drawable/ic_user"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white"
-            android:textSize="20sp"
-            android:background="@drawable/rounded_corner"
-            android:padding="18dp"
-            android:inputType="text"
-            android:id="@+id/usernameInput"/>
+            android:layout_marginTop="32dp">
 
-        <EditText
+            <com.google.android.material.textfield.TextInputEditText
+
+                android:id="@+id/usernameInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_corner"
+                android:hint="Username"
+                android:inputType="text"
+                android:padding="18dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                android:textSize="20sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Password"
-            android:drawableStart="@drawable/ic_password"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white"
-            android:textSize="20sp"
-            android:background="@drawable/rounded_corner"
-            android:padding="18dp"
-            android:inputType="textPassword"
-            android:id="@+id/passwordInput"/>
+            app:passwordToggleEnabled="true"
+            android:layout_marginTop="32dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+
+                android:id="@+id/passwordInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_corner"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:padding="18dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                android:textSize="20sp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
 
         <Button
             android:layout_width="match_parent"

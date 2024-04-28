@@ -15,7 +15,6 @@
         android:background="@drawable/ic_back_arrow"
         android:onClick="onBackPressed" />
 
-
     <ImageView
         android:id="@+id/logo"
         android:layout_width="60dp"

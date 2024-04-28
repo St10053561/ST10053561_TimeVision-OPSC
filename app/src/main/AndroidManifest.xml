@@ -21,7 +21,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!--        //Adding a another activity here-->
         <activity android:name=".ProjectDetailActivity" />
+
+        <!--        //Adding a another activity here-->
+        <activity android:name=".DatePickerActivity" />
+
     </application>
 
 </manifest>

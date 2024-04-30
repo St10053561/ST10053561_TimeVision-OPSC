@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">TimeVision_Application</string>
+    <string name="app_name">TimeVisionPrototype</string>
+    <string name="absence_request_form">Absence Request Form</string>
+    <string name="report">Report</string>
+    <string name="time_sheet_entries_table">Time Sheet Entries Table</string>
+    <string name="time_sheet_entry_form">Time Sheet Entry Form</string>
+    <string name="envision_the_future_one_tick_at_a_time">Envision the Future, One Tick at a Time.</string>
+    <string name="timevision">TimeVision.</string>
 </resources>

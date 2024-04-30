@@ -400,6 +400,5 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
         return false
     }
 }
-
 // Data class to represent user information
 data class Users(val name: String? = null, val surname: String? = null, val age: String? = null, val email: String? = null, val username: String? = null, val password: String? = null)

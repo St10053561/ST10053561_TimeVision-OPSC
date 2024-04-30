@@ -4,14 +4,18 @@ import android.os.Bundle
 import android.util.Patterns
 import android.view.KeyEvent
 import android.view.View
+import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.timevision_application.databinding.ActivityMainBinding
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import java.util.*
 
 class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeListener, View.OnKeyListener {
@@ -25,7 +29,11 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
     private lateinit var confirmPasswordInput: TextInputEditText
 
     //A variable to store the entered password
-    lateinit var storePassword: String
+    private lateinit var storePassword: String
+
+    //Declaring variables for data binding and Database transmigration
+    private lateinit var bind: ActivityMainBinding
+    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,9 +58,10 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
         passwordInput.onFocusChangeListener = this
         confirmPasswordInput.onFocusChangeListener = this
 
-        // Set up click listener for dateOfBirthInput
-        dateOfBirthInput.setOnClickListener {
-            showDatePicker()
+        // Set onClickListener for the back button
+        val backButton = findViewById<Button>(R.id.backButton)
+        backButton.setOnClickListener {
+            onBackPressed()
         }
 
         // Apply edge-to-edge display
@@ -61,7 +70,30 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        // Set up click listener for dateOfBirthInput
+        dateOfBirthInput.setOnClickListener {
+            showDatePicker()
+        }
+
+        // Set up click listener for signUpBtn
+        val signUpBtn = findViewById<Button>(R.id.signUpBtn)
+        signUpBtn.setOnClickListener {
+            if (validateInputs()) {
+                saveUserToDatabase(
+                    nameInput.text.toString(),
+                    surnameInput.text.toString(),
+                    emailInput.text.toString(),
+                    usernameInput.text.toString(),
+                    dateOfBirthInput.text.toString()
+                )
+            }
+        }
+
+        // Initialize database reference
+        database = FirebaseDatabase.getInstance().reference
     }
+
     //A method to show the DatePicker
     private fun showDatePicker() {
         val builder = MaterialDatePicker.Builder.datePicker()
@@ -95,14 +127,52 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
         }
         picker.show(supportFragmentManager, picker.toString())
     }
+
+    // Method to validate all input fields
+    private fun validateInputs(): Boolean {
+        return validateFullName() && validateSurname() && CheckForDate() &&
+                validateEmail() && validateUsername() && validatePassword() &&
+                validateConfirmPassword()
+    }
+
+    // Method to save user information to the database
+    private fun saveUserToDatabase(name: String, surname: String, email: String, username: String, dateOfBirth: String) {
+        val userId = UUID.randomUUID().toString() // Generate a unique ID for the user
+
+        // Calculate age
+        val age = calculateAge(dateOfBirth)
+
+        val userData = Users(name, surname, age.toString(), email, username, storePassword)
+        database.child("users").child(userId).setValue(userData)
+    }
+
+    // Method to calculate age from date of birth
+    private fun calculateAge(dateOfBirth: String): Int {
+        val dobParts = dateOfBirth.split("/")
+        val dobDay = dobParts[0].toInt()
+        val dobMonth = dobParts[1].toInt()
+        val dobYear = dobParts[2].toInt()
+
+        val cal = Calendar.getInstance()
+        val currentYear = cal.get(Calendar.YEAR)
+        val currentMonth = cal.get(Calendar.MONTH) + 1
+        val currentDay = cal.get(Calendar.DAY_OF_MONTH)
+
+        var age = currentYear - dobYear
+
+        if (currentMonth < dobMonth || (currentMonth == dobMonth && currentDay < dobDay)) {
+            age--
+        }
+
+        return age
+    }
+
     //A method to validate the Name
-    private fun validateFullName():Boolean
-    {
+    private fun validateFullName(): Boolean {
         var errorMessage: String? = null
         val name: String = nameInput.text.toString()
 
-        if(name.isNullOrEmpty())
-        {
+        if (name.isNullOrEmpty()) {
             errorMessage = "Full Name Required"
         }
         if (errorMessage != null) {
@@ -113,14 +183,13 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
         }
         return errorMessage == null
     }
+
     //A method to validate the Surname
-    private fun validateSurname():Boolean
-    {
+    private fun validateSurname(): Boolean {
         var errorMessage: String? = null
         val surname: String = surnameInput.text.toString()
 
-        if(surname.isNullOrEmpty())
-        {
+        if (surname.isNullOrEmpty()) {
             errorMessage = "Full Surname Required"
         }
         if (errorMessage != null) {
@@ -131,14 +200,13 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
         }
         return errorMessage == null
     }
+
     //A method to Check if the User Selected A Date
-    private fun CheckForDate():Boolean
-    {
+    private fun CheckForDate(): Boolean {
         var errorMessage: String? = null
         val datePresent: String = dateOfBirthInput.text.toString()
 
-        if(datePresent.isNullOrEmpty())
-        {
+        if (datePresent.isNullOrEmpty()) {
             errorMessage = "Select Date Of Birth"
         }
         if (errorMessage != null) {
@@ -149,18 +217,15 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
         }
         return errorMessage == null
     }
+
     //A method to validate the Email
-    private fun validateEmail():Boolean
-    {
+    private fun validateEmail(): Boolean {
         var errorMessage: String? = null
         val email: String = emailInput.text.toString()
 
-        if(email.isNullOrEmpty())
-        {
+        if (email.isNullOrEmpty()) {
             errorMessage = "Full Email is Required"
-        }
-        else if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
-        {
+        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             errorMessage = "Email Is InValid"
         }
         if (errorMessage != null) {
@@ -171,14 +236,13 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
         }
         return errorMessage == null
     }
+
     //A method to validate the Username
-    private fun validateUsername():Boolean
-    {
+    private fun validateUsername(): Boolean {
         var errorMessage: String? = null
         val username: String = usernameInput.text.toString()
 
-        if(username.isNullOrEmpty())
-        {
+        if (username.isNullOrEmpty()) {
             errorMessage = "A Username is Required"
         }
         if (errorMessage != null) {
@@ -190,23 +254,24 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
 
         return errorMessage == null
     }
+
     //A method to validate the Password
     private fun validatePassword(): Boolean {
         var errorMessage: String? = null
         val password: String = passwordInput.text.toString()
 
         if (password.isNullOrEmpty()) {
-            errorMessage += "A Password is Required"
+            errorMessage = "A Password is Required"
         } else if (password.length < 8) {
-            errorMessage += "The password must be a minimum of 8 characters long"
+            errorMessage = "The password must be a minimum of 8 characters long"
         } else if (!password.any { it.isUpperCase() }) {
-            errorMessage += "The password must contain an uppercase letter"
+            errorMessage = "The password must contain an uppercase letter"
         } else if (!password.any { it.isLowerCase() }) {
-            errorMessage += "The password must contain a lowercase letter"
+            errorMessage = "The password must contain a lowercase letter"
         } else if (!password.any { it.isDigit() }) {
-            errorMessage += "The password must contain a digit"
+            errorMessage = "The password must contain a digit"
         } else if (!password.any { !it.isLetterOrDigit() }) {
-            errorMessage += "The password must contain a special character"
+            errorMessage = "The password must contain a special character"
         }
         if (errorMessage != null) {
             // Access the TextInputLayout associated with nameInput
@@ -217,18 +282,16 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
         storePassword = password
         return errorMessage == null
     }
+
     //A method to validate the Confirm Password
-    private fun validateConfirmPassword():Boolean
-    {
+    private fun validateConfirmPassword(): Boolean {
         var errorMessage: String? = null
         val confirmPassword: String = confirmPasswordInput.text.toString()
 
-        if(confirmPassword.isNullOrEmpty())
-        {
+        if (confirmPassword.isNullOrEmpty()) {
             errorMessage = "Password Confirmation is Required"
         }
-        if(!confirmPassword.equals(storePassword))
-        {
+        if (!confirmPassword.equals(storePassword)) {
             errorMessage = "Confirmation Password Does Not Match The Password Above"
         }
         if (errorMessage != null) {
@@ -241,105 +304,88 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
     }
 
     override fun onFocusChange(view: View, hasFocus: Boolean) {
-        if(view != null)
-        {
-            when(view.id)
-            {
+        if (view != null) {
+            when (view.id) {
                 R.id.nameInput -> {
-                    if(hasFocus)
-                    {
+                    if (hasFocus) {
                         // Checking if error is enabled and removing it when focused
                         val nameInputLayout = nameInput.parent.parent as TextInputLayout
-                        if(nameInputLayout.isErrorEnabled)
-                        {
+                        if (nameInputLayout.isErrorEnabled) {
                             nameInputLayout.isErrorEnabled = false
                         }
-                    }else
-                    {
+                    } else {
                         validateFullName()
                     }
                 }
+
                 R.id.surnameInput -> {
-                    if(hasFocus)
-                    {
+                    if (hasFocus) {
                         // Checking if error is enabled and removing it when focused
                         val nameInputLayout = surnameInput.parent.parent as TextInputLayout
-                        if(nameInputLayout.isErrorEnabled)
-                        {
+                        if (nameInputLayout.isErrorEnabled) {
                             nameInputLayout.isErrorEnabled = false
                         }
-                    }else
-                    {
+                    } else {
                         validateSurname()
                     }
                 }
+
                 R.id.dateOfBirthInput -> {
-                    if(hasFocus)
-                    {
+                    if (hasFocus) {
                         // Checking if error is enabled and removing it when focused
                         val nameInputLayout = dateOfBirthInput.parent.parent as TextInputLayout
-                        if(nameInputLayout.isErrorEnabled)
-                        {
+                        if (nameInputLayout.isErrorEnabled) {
                             nameInputLayout.isErrorEnabled = false
                         }
-                    }else
-                    {
+                    } else {
                         CheckForDate()
                     }
                 }
+
                 R.id.emailInput -> {
-                    if(hasFocus)
-                    {
+                    if (hasFocus) {
                         // Checking if error is enabled and removing it when focused
                         val nameInputLayout = emailInput.parent.parent as TextInputLayout
-                        if(nameInputLayout.isErrorEnabled)
-                        {
+                        if (nameInputLayout.isErrorEnabled) {
                             nameInputLayout.isErrorEnabled = false
                         }
-                    }else
-                    {
+                    } else {
                         validateEmail()
                     }
                 }
+
                 R.id.usernameInput -> {
-                    if(hasFocus)
-                    {
+                    if (hasFocus) {
                         // Checking if error is enabled and removing it when focused
                         val nameInputLayout = usernameInput.parent.parent as TextInputLayout
-                        if(nameInputLayout.isErrorEnabled)
-                        {
+                        if (nameInputLayout.isErrorEnabled) {
                             nameInputLayout.isErrorEnabled = false
                         }
-                    }else
-                    {
+                    } else {
                         validateUsername()
                     }
                 }
+
                 R.id.passwordInput -> {
-                    if(hasFocus)
-                    {
+                    if (hasFocus) {
                         // Checking if error is enabled and removing it when focused
                         val nameInputLayout = passwordInput.parent.parent as TextInputLayout
-                        if(nameInputLayout.isErrorEnabled)
-                        {
+                        if (nameInputLayout.isErrorEnabled) {
                             nameInputLayout.isErrorEnabled = false
                         }
-                    }else
-                    {
+                    } else {
                         validatePassword()
                     }
                 }
+
                 R.id.confirmpasswordInput -> {
-                    if(hasFocus)
-                    {
+                    if (hasFocus) {
                         // Checking if error is enabled and removing it when focused
                         val nameInputLayout = confirmPasswordInput.parent.parent as TextInputLayout
-                        if(nameInputLayout.isErrorEnabled)
-                        {
+                        if (nameInputLayout.isErrorEnabled) {
                             nameInputLayout.isErrorEnabled = false
                         }
-                    }else
-                    {
+                    } else {
                         validateConfirmPassword()
                     }
                 }
@@ -354,3 +400,5 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
         return false
     }
 }
+// Data class to represent user information
+data class Users(val name: String? = null, val surname: String? = null, val age: String? = null, val email: String? = null, val username: String? = null, val password: String? = null)

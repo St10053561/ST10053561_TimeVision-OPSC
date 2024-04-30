@@ -6,7 +6,7 @@ data class Project(
     val description : String,
     val minHours: Int,
     val maxHours: Int,
-    val userPhoto: String,
+    val userPhoto: Int,
     val projectDate: String,
     val totalHours: List<Int> // Adding a property for each day hours of a week.
 ) : Serializable

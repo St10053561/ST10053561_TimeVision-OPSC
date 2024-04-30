@@ -45,5 +45,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     implementation("androidx.cardview:cardview:1.0.0")
+
+    //Adding the implementation for the date range picker
+    implementation("com.google.android.material:material:1.8.0")
+    //Adding the link here for github
+    implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
+
     androidTestImplementation(libs.androidx.espresso.core)
 }

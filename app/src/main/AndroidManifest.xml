@@ -27,6 +27,8 @@
         <!--        //Adding a another activity here-->
         <activity android:name=".DatePickerActivity" />
 
+        <!--Adding a another activity here-->
+        <activity android:name=".ChartsActivity" />
     </application>
 
 </manifest>

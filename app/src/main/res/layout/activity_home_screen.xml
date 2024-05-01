@@ -52,133 +52,188 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"/>
 
-    <LinearLayout
-        android:id="@+id/topPanel"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dp">
+        android:layout_height="match_parent"
+        android:layout_below="@+id/current_time">
+
 
         <LinearLayout
-            android:id="@+id/firstRow"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="1"
-            android:layout_marginEnd="5dp">
+            android:orientation="vertical" >
 
-            <ImageButton
-                android:id="@+id/timeSheetEntryButton"
-                android:layout_width="124dp"
-                android:layout_height="123dp"
-                android:layout_marginStart="30dp"
-                android:src="@drawable/ic_timesheet_entry"
-                android:scaleType="fitCenter"
-                android:background="@color/white"/>
-
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/topPanel"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/time_sheet_entry_form"
-                android:textColor="@color/white"
-                android:fontFamily="sans-serif-black"
-                android:textSize="15sp"
-                android:layout_marginStart="10dp"/>
-        </LinearLayout>
+                android:layout_marginBottom="20dp"
+                android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/secondRow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="1"
-            android:layout_marginStart="5dp">
+                <LinearLayout
+                    android:id="@+id/firstRow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-            <ImageButton
-                android:id="@+id/timeSheetTableButton"
-                android:layout_width="124dp"
-                android:layout_height="123dp"
-                android:layout_marginStart="10dp"
-                android:src="@drawable/ic_timesheet_entry_table"
-                android:scaleType="fitCenter"
-                android:background="@color/white" />
+                    <ImageButton
+                        android:id="@+id/timeSheetEntryButton"
+                        android:layout_width="124dp"
+                        android:layout_height="123dp"
+                        android:layout_marginStart="30dp"
+                        android:background="@color/white"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_timesheet_entry" />
 
-            <TextView
-                android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="10dp"
+                        android:fontFamily="sans-serif-black"
+                        android:text="@string/time_sheet_entry_form"
+                        android:textColor="@color/white"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/secondRow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/timeSheetTableButton"
+                        android:layout_width="124dp"
+                        android:layout_height="123dp"
+                        android:layout_marginStart="10dp"
+                        android:background="@color/white"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_timesheet_entry_table" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="-10dp"
+                        android:fontFamily="sans-serif-black"
+                        android:text="@string/time_sheet_entries_table"
+                        android:textColor="@color/white"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/middlePanel"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/time_sheet_entries_table"
-                android:textColor="@color/white"
-                android:fontFamily="sans-serif-black"
-                android:textSize="15sp"
-                android:layout_marginStart="-10dp"/>
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="147dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/reportButton"
+                        android:layout_width="124dp"
+                        android:layout_height="123dp"
+                        android:layout_marginStart="30dp"
+                        android:background="@color/white"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_report_icon" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="-45dp"
+                        android:fontFamily="sans-serif-black"
+                        android:text="@string/report"
+                        android:textColor="@color/white"
+                        android:textSize="15sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/absenceRequestButton"
+                        android:layout_width="124dp"
+                        android:layout_height="123dp"
+                        android:layout_marginStart="10dp"
+                        android:background="@color/white"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_absent_request" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="-10dp"
+                        android:fontFamily="sans-serif-black"
+                        android:text="@string/absence_request_form"
+                        android:textColor="@color/white"
+                        android:textSize="15sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/bottomPanel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="147dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <ImageButton
+                        android:id="@+id/categoryButton"
+                        android:layout_width="124dp"
+                        android:layout_height="123dp"
+                        android:layout_marginStart="30dp"
+                        android:background="@color/white"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/category_icon" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="-45dp"
+                        android:fontFamily="sans-serif-black"
+                        android:text="@string/category"
+                        android:textColor="@color/white"
+                        android:textSize="15sp" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"/>
+            </LinearLayout>
         </LinearLayout>
-
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/bottomPanel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_above="@id/topPanel">
-
-        <LinearLayout
-            android:layout_width="147dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <ImageButton
-                android:id="@+id/reportButton"
-                android:layout_width="124dp"
-                android:layout_height="123dp"
-                android:layout_marginStart="30dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_report_icon"
-                android:background="@color/white"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:fontFamily="sans-serif-black"
-                android:text="@string/report"
-                android:textColor="@color/white"
-                android:textSize="15sp"
-                android:layout_marginStart="-45dp"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="1"
-            android:layout_marginStart="5dp">
-
-            <ImageButton
-                android:id="@+id/absenceRequestButton"
-                android:layout_width="124dp"
-                android:layout_height="123dp"
-                android:layout_marginStart="10dp"
-                android:background="@color/white"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_absent_request" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/absence_request_form"
-                android:textColor="@color/white"
-                android:fontFamily="sans-serif-black"
-                android:textSize="15sp"
-                android:layout_marginStart="-10dp"/>
-        </LinearLayout>
-    </LinearLayout>
+    </ScrollView>
 </RelativeLayout>
+
+
+
 
 

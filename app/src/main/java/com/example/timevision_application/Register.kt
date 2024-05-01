@@ -1,10 +1,12 @@
 package com.example.timevision_application
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -144,7 +146,18 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
 
         val userData = Users(name, surname, age.toString(), email, username, storePassword)
         database.child("users").child(userId).setValue(userData)
+            .addOnSuccessListener {
+                // If user data is saved successfully, navigate to HomeScreen
+                val intent = Intent(this@Register, HomeScreen::class.java)
+                startActivity(intent)
+                // Finish the current activity to prevent the user from coming back via the back button
+                finish()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this@Register,"Registration Failed", Toast.LENGTH_SHORT).show()
+            }
     }
+
 
     // Method to calculate age from date of birth
     private fun calculateAge(dateOfBirth: String): Int {
@@ -400,5 +413,6 @@ class Register : AppCompatActivity(), View.OnClickListener, View.OnFocusChangeLi
         return false
     }
 }
+
 // Data class to represent user information
 data class Users(val name: String? = null, val surname: String? = null, val age: String? = null, val email: String? = null, val username: String? = null, val password: String? = null)

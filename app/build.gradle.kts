@@ -56,7 +56,15 @@ dependencies {
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
+    //Circluar Image Library
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 
     implementation("com.google.firebase:firebase-analytics")
+    //Firebase Libraries
+    implementation("com.google.firebase:firebase-auth:22.3.1")
+    implementation("com.google.firebase:firebase-database:20.3.1")
+    implementation("com.google.firebase:firebase-storage:20.3.0")
+    //Progress Dialog
+    implementation("com.jpardogo.googleprogressbar:library:1.2.0")
 
 }

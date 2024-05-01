@@ -8,6 +8,9 @@ import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.database
 
 class MainActivity : AppCompatActivity() {
 
@@ -15,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var endDatePicker: DatePicker
     private lateinit var reasonEditText: EditText
     private lateinit var commentsEditText: EditText
+    private val db = Firebase.database.reference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,14 +48,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveInformation(startDate: String, endDate: String, reason: String, comments: String) {
-        val sharedPreferences: SharedPreferences = getSharedPreferences("AbsenceRequest", Context.MODE_PRIVATE)
-        val editor: SharedPreferences.Editor = sharedPreferences.edit()
-        editor.putString("startDate", startDate)
-        editor.putString("endDate", endDate)
-        editor.putString("reason", reason)
-        editor.putString("comments", comments)
-        editor.apply()
-        showToast("Absence request saved.")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val absenceData = hashMapOf(
+            "startDate" to startDate,
+            "endDate" to endDate,
+            "reason" to reason,
+            "comments" to comments
+        )
+
+        db.child("absences").child(userId ?: "null").push().setValue(absenceData)
+            .addOnSuccessListener {
+                showToast("Absence request saved.")
+            }
+            .addOnFailureListener { e ->
+                showToast("Error adding document")
+            }
     }
 
     private fun clearForm() {

@@ -1,3 +1,31 @@
 <resources>
-    <string name="app_name">TimeVision_Application</string>
+    <string name="app_name">TimeVisionPrototype</string>
+    <string name="absence_request_form">Absence Request Form</string>
+    <string name="report">Report</string>
+    <string name="time_sheet_entries_table">Time Sheet Entries Table</string>
+    <string name="time_sheet_entry_form">Time Sheet Entry Form</string>
+    <string name="envision_the_future_one_tick_at_a_time">Envision the Future, One Tick at a Time.</string>
+    <string name="timevision">TimeVision.</string>
+    <string name="sign_up">Sign up</string>
+    <string name="login">Login</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="pick_date_of_birth">Pick Date of Birth</string>
+    <string name="surname">Surname</string>
+    <string name="name">Name</string>
+    <string name="already_registered_log_in_here">Already Registered? Log in here.</string>
+    <string name="create_new_account">Create new Account</string>
+    <string name="category">Categories</string>
+    <string name="pick_end_time">Max Hrs/Day</string>
+    <string name="total_duration">Hrs/Week</string>
+    <string name="pick_start_time">Min Hrs/Day</string>
+    <string name="pick_end_date">Pick End Date</string>
+    <string name="pick_start_date">Pick Start Date</string>
+    <string name="enter_category">Enter Category</string>
+    <string name="select_date">Select Date</string>
+    <string name="enter_project_name">Enter Project Name</string>
+    <string name="browse_files">Browse Files</string>
+    <string name="picture_upload">Picture Upload</string>
 </resources>

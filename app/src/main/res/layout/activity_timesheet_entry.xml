@@ -94,8 +94,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/startTimeInput"
+        <EditText
+            android:id="@+id/minimumDailyHoursInput"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -103,8 +103,8 @@
             android:inputType="time"
             android:focusable="false" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/endTimeInput"
+        <EditText
+            android:id="@+id/maximumDailyHoursInput"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"

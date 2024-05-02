@@ -33,8 +33,8 @@ class TimesheetEntry : AppCompatActivity() {
     private lateinit var categoryInput: TextInputEditText
     private lateinit var startDateInput: TextInputEditText
     private lateinit var endDateInput: TextInputEditText
-    private lateinit var startTimeInput: EditText
-    private lateinit var endTimeInput: EditText
+    private lateinit var minimumDailyHoursInput: EditText
+    private lateinit var maximumDailyHoursInput: EditText
     private lateinit var totalDuration: TextInputEditText
     private lateinit var workDescriptionInput: TextInputEditText
     private lateinit var submitButton: Button
@@ -61,11 +61,12 @@ class TimesheetEntry : AppCompatActivity() {
         categoryInput = findViewById(R.id.categoryInput)
         startDateInput = findViewById(R.id.startDateInput)
         endDateInput = findViewById(R.id.endDateInput)
-        startTimeInput = findViewById(R.id.startTimeInput)
-        endTimeInput = findViewById(R.id.endTimeInput)
+        minimumDailyHoursInput = findViewById(R.id.minimumDailyHoursInput)
+        maximumDailyHoursInput = findViewById(R.id.maximumDailyHoursInput)
         workDescriptionInput = findViewById(R.id.workDescriptionInput)
+        totalDuration = findViewById(R.id.totalDuration)
         submitButton = findViewById(R.id.submitButton)
-        browseFilesButton = findViewById(R.id.browseFilesButton) // Initialize browseFilesButton
+        browseFilesButton = findViewById(R.id.browseFilesButton)
 
         // Set OnClickListener to open DatePickerDialog for dateInput
         dateInput.setOnClickListener {
@@ -82,14 +83,14 @@ class TimesheetEntry : AppCompatActivity() {
             showDatePicker(endDateInput)
         }
 
-        // Set OnClickListener to open TimePickerDialog for startTimeInput
-        startTimeInput.setOnClickListener {
-            showTimePicker(startTimeInput)
+        // Set OnClickListener to open TimePickerDialog for minimumDailyHoursInput
+        minimumDailyHoursInput.setOnClickListener {
+            showTimePicker(minimumDailyHoursInput)
         }
 
-        // Set OnClickListener to open TimePickerDialog for endTimeInput
-        endTimeInput.setOnClickListener {
-            showTimePicker(endTimeInput)
+        // Set OnClickListener to open TimePickerDialog for maximumDailyHoursInput
+        maximumDailyHoursInput.setOnClickListener {
+            showTimePicker(maximumDailyHoursInput)
         }
 
         browseFilesButton.setOnClickListener {
@@ -105,19 +106,11 @@ class TimesheetEntry : AppCompatActivity() {
             val workDescription = workDescriptionInput.text.toString()
             val startDate = startDateInput.text.toString()
             val endDate = endDateInput.text.toString()
-            val startTime = startTimeInput.text.toString()
-            val endTime = endTimeInput.text.toString()
+            val minimumDailyHours = minimumDailyHoursInput.text.toString()
+            val maximumDailyHours = maximumDailyHoursInput.text.toString()
+            val totalDuration = totalDuration.text.toString()
 
-            // Calculate totalDuration
-            val totalDurationValue = calculateTotalDuration(startTime, endTime)
-
-            // Initialize the totalDuration property
-            totalDuration = findViewById(R.id.totalDuration)
-
-            // Update the totalDuration EditText
-            totalDuration.setText(totalDurationValue)
-
-            saveToDatabase(projectName, category, workDescription, startDate, endDate, startTime, endTime, totalDurationValue, imageUri)
+            saveToDatabase(projectName, category, workDescription, startDate, endDate, minimumDailyHours, maximumDailyHours,totalDuration, imageUri)
         }
     }
 
@@ -161,55 +154,36 @@ class TimesheetEntry : AppCompatActivity() {
         timePickerDialog.show()
     }
 
-    private fun calculateTotalDuration(startTime: String, endTime: String): String {
-        // Split the time strings into hours and minutes
-        val startParts = startTime.split(":")
-        val endParts = endTime.split(":")
-
-        // Convert hours and minutes to minutes
-        val startMinutes = startParts[0].toInt() * 60 + startParts[1].toInt()
-        val endMinutes = endParts[0].toInt() * 60 + endParts[1].toInt()
-
-        // Calculate the difference in minutes
-        val durationMinutes = endMinutes - startMinutes
-
-        // Convert the difference back to hours and minutes format
-        val hours = durationMinutes / 60
-        val minutes = durationMinutes % 60
-
-        // Return the formatted total duration string
-        return String.format("%02d:%02d", hours, minutes)
-    }
-
     private fun saveToDatabase(
         projectName: String,
         category: String,
         workDescription: String,
         startDate: String,
         endDate: String,
-        startTime: String,
-        endTime: String,
+        minimumDailyHours: String,
+        maximumDailyHours: String,
         totalDuration: String,
-        imageUri: Uri? // Pass the image URI as a parameter
+        // Pass the image URI as a parameter
+        imageUri: Uri?
     ) {
         // Code to save entry to a database
         val uid = auth.currentUser?.uid
         databaseReference = FirebaseDatabase.getInstance().getReference("TimeSheetEntries")
 
-        // Construct a Users object
-        val user = Users(
+        // Construct a TimesheetEntry object
+        val entry = TimesheetEntry(
             projectName,
             startDate,
             endDate,
             category,
-            startTime,
-            endTime,
-            totalDuration,
-            workDescription
+            minimumDailyHours,
+            maximumDailyHours,
+            workDescription,
+            totalDuration
         )
 
         if (uid != null) {
-            databaseReference.child(uid).setValue(user).addOnCompleteListener { task ->
+            databaseReference.child(uid).setValue(entry).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // If data saving is successful, upload the image
                     imageUri?.let { uploadImage(it) }
@@ -257,15 +231,14 @@ class TimesheetEntry : AppCompatActivity() {
         }
     }
 
-    data class Users(
+    data class TimesheetEntry(
         var projectName: String? = null,
-        var date: String? = null,
-        var category: String? = null,
         var startDate: String? = null,
         var endDate: String? = null,
-        var startTime: String? = null,
-        var endTime: String? = null,
-        var totalDuration: String? = null,
-        var workDescriptionInput: String? = null
+        var category: String? = null,
+        var minimumDailyHours: String? = null,
+        var maximumDailyHours: String? = null,
+        var workDescription: String? = null,
+        var totalDuration: String? = null
     )
 }

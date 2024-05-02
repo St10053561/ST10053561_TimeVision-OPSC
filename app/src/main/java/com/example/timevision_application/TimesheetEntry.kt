@@ -67,6 +67,7 @@ class TimesheetEntry : AppCompatActivity() {
         totalDuration = findViewById(R.id.totalDuration)
         submitButton = findViewById(R.id.submitButton)
         browseFilesButton = findViewById(R.id.browseFilesButton)
+        // make a cmment
 
         // Set OnClickListener to open DatePickerDialog for dateInput
         dateInput.setOnClickListener {

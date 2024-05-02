@@ -10,13 +10,12 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.timevision_application.databinding.ActivityMainBinding
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import java.util.*
 
 class TimesheetEntry : AppCompatActivity() {
@@ -31,8 +30,8 @@ class TimesheetEntry : AppCompatActivity() {
     private lateinit var projectNameInput: TextInputEditText
     private lateinit var dateInput: TextInputEditText
     private lateinit var categoryInput: TextInputEditText
-    private lateinit var startDateInput: TextInputEditText
-    private lateinit var endDateInput: TextInputEditText
+    private lateinit var startTimeInput: TextInputEditText
+    private lateinit var endTimeInput: TextInputEditText
     private lateinit var minimumDailyHoursInput: EditText
     private lateinit var maximumDailyHoursInput: EditText
     private lateinit var totalDuration: TextInputEditText
@@ -40,7 +39,6 @@ class TimesheetEntry : AppCompatActivity() {
     private lateinit var submitButton: Button
 
     // Variables for database
-    private lateinit var binding: ActivityMainBinding
     private lateinit var auth: FirebaseAuth
     private lateinit var databaseReference: DatabaseReference
 
@@ -59,15 +57,14 @@ class TimesheetEntry : AppCompatActivity() {
         projectNameInput = findViewById(R.id.projectNameInput)
         dateInput = findViewById(R.id.dateInput)
         categoryInput = findViewById(R.id.categoryInput)
-        startDateInput = findViewById(R.id.startDateInput)
-        endDateInput = findViewById(R.id.endDateInput)
+        startTimeInput = findViewById(R.id.startTimeInput)
+        endTimeInput = findViewById(R.id.endTimeInput)
         minimumDailyHoursInput = findViewById(R.id.minimumDailyHoursInput)
         maximumDailyHoursInput = findViewById(R.id.maximumDailyHoursInput)
         workDescriptionInput = findViewById(R.id.workDescriptionInput)
         totalDuration = findViewById(R.id.totalDuration)
         submitButton = findViewById(R.id.submitButton)
         browseFilesButton = findViewById(R.id.browseFilesButton)
-        // make a cmment
 
         // Set OnClickListener to open DatePickerDialog for dateInput
         dateInput.setOnClickListener {
@@ -75,13 +72,13 @@ class TimesheetEntry : AppCompatActivity() {
         }
 
         // Set OnClickListener to open DatePickerDialog for startDateInput
-        startDateInput.setOnClickListener {
-            showDatePicker(startDateInput)
+        startTimeInput.setOnClickListener {
+            showTimePicker(startTimeInput)
         }
 
         // Set OnClickListener to open DatePickerDialog for endDateInput
-        endDateInput.setOnClickListener {
-            showDatePicker(endDateInput)
+        endTimeInput.setOnClickListener {
+            showTimePicker(endTimeInput)
         }
 
         // Set OnClickListener to open TimePickerDialog for minimumDailyHoursInput
@@ -105,13 +102,13 @@ class TimesheetEntry : AppCompatActivity() {
             val projectName = projectNameInput.text.toString()
             val category = categoryInput.text.toString()
             val workDescription = workDescriptionInput.text.toString()
-            val startDate = startDateInput.text.toString()
-            val endDate = endDateInput.text.toString()
+            val startTime = startTimeInput.text.toString()
+            val endTime = endTimeInput.text.toString()
             val minimumDailyHours = minimumDailyHoursInput.text.toString()
             val maximumDailyHours = maximumDailyHoursInput.text.toString()
             val totalDuration = totalDuration.text.toString()
 
-            saveToDatabase(projectName, category, workDescription, startDate, endDate, minimumDailyHours, maximumDailyHours,totalDuration, imageUri)
+            saveToDatabase(projectName, category, workDescription, startTime, endTime, minimumDailyHours, maximumDailyHours,totalDuration, imageUri)
         }
     }
 
@@ -159,8 +156,8 @@ class TimesheetEntry : AppCompatActivity() {
         projectName: String,
         category: String,
         workDescription: String,
-        startDate: String,
-        endDate: String,
+        startTime: String,
+        endTime: String,
         minimumDailyHours: String,
         maximumDailyHours: String,
         totalDuration: String,
@@ -172,10 +169,10 @@ class TimesheetEntry : AppCompatActivity() {
         databaseReference = FirebaseDatabase.getInstance().getReference("TimeSheetEntries")
 
         // Construct a TimesheetEntry object
-        val entry = TimesheetEntry(
+        val entry = TimesheetEntryData(
             projectName,
-            startDate,
-            endDate,
+            startTime,
+            endTime,
             category,
             minimumDailyHours,
             maximumDailyHours,
@@ -232,10 +229,10 @@ class TimesheetEntry : AppCompatActivity() {
         }
     }
 
-    data class TimesheetEntry(
+    data class TimesheetEntryData(
         var projectName: String? = null,
-        var startDate: String? = null,
-        var endDate: String? = null,
+        var startTime: String? = null,
+        var endTime: String? = null,
         var category: String? = null,
         var minimumDailyHours: String? = null,
         var maximumDailyHours: String? = null,

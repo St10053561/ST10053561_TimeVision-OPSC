@@ -1,6 +1,5 @@
 package com.example.timevision_application
 
-
 import Project
 import android.content.Intent
 import android.graphics.Color

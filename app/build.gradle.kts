@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -42,14 +43,16 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.firebase.database)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+
+    // adding a implementation of card view
     implementation("androidx.cardview:cardview:1.0.0")
 
     //Adding the implementation for the date range picker
     implementation("com.google.android.material:material:1.8.0")
     //Adding the link here for github
     implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
-
-    androidTestImplementation(libs.androidx.espresso.core)
 }

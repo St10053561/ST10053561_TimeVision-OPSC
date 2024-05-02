@@ -121,6 +121,7 @@ class MainActivity : AppCompatActivity(), OnFocusChangeListener {
     }
 
     // Firebase login
+    // Modify the loginUser function to pass the username to getUserKey
     private fun loginUser(username: String, password: String) {
         mAuth.signInWithEmailAndPassword(username, password)
             .addOnCompleteListener(this) { task ->
@@ -128,7 +129,7 @@ class MainActivity : AppCompatActivity(), OnFocusChangeListener {
                     // Sign in success, update UI with the signed-in user's information
                     val user = mAuth.currentUser
                     user?.let {
-                        getUserKey(user.uid)
+                        getUserKey(username) // Pass the username here
                     }
                 } else {
                     // If sign in fails, display a message to the user.
@@ -141,9 +142,9 @@ class MainActivity : AppCompatActivity(), OnFocusChangeListener {
             }
     }
 
-    // Retrieve user key from Firebase Realtime Database
-    private fun getUserKey(userId: String) {
-        mDatabase.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(object :
+    // Modify the getUserKey function to accept the username as a parameter
+    private fun getUserKey(username: String) {
+        mDatabase.orderByChild("email").equalTo(username).addListenerForSingleValueEvent(object :
             ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {

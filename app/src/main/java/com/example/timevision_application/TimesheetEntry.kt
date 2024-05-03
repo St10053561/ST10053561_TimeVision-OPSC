@@ -78,29 +78,36 @@ class TimesheetEntry : AppCompatActivity() {
         submitButton = findViewById(R.id.submitButton)
         browseFilesButton = findViewById(R.id.browseFilesButton)
 
-        // Set OnClickListener to open DatePickerDialog for dateInput
-        dateInput.setOnClickListener {
-            showDatePicker(dateInput)
+
+        // Set OnFocusChangeListener for the TextInputEditText fields
+        dateInput.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showDatePicker(dateInput)
+            }
         }
 
-        // Set OnClickListener to open DatePickerDialog for startDateInput
-        startTimeInput.setOnClickListener {
-            showTimePicker(startTimeInput)
+        startTimeInput.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showTimePicker(startTimeInput)
+            }
         }
 
-        // Set OnClickListener to open DatePickerDialog for endDateInput
-        endTimeInput.setOnClickListener {
-            showTimePicker(endTimeInput)
+        endTimeInput.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showTimePicker(endTimeInput)
+            }
         }
 
-        // Set OnClickListener to open TimePickerDialog for minimumDailyHoursInput
-        minimumDailyHoursInput.setOnClickListener {
-            showTimePicker(minimumDailyHoursInput)
+        minimumDailyHoursInput.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showTimePicker(minimumDailyHoursInput)
+            }
         }
 
-        // Set OnClickListener to open TimePickerDialog for maximumDailyHoursInput
-        maximumDailyHoursInput.setOnClickListener {
-            showTimePicker(maximumDailyHoursInput)
+        maximumDailyHoursInput.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showTimePicker(maximumDailyHoursInput)
+            }
         }
 
         browseFilesButton.setOnClickListener {
@@ -112,6 +119,7 @@ class TimesheetEntry : AppCompatActivity() {
         submitButton.setOnClickListener {
             /// Get the text entered by the user
             val projectName = projectNameInput.text.toString()
+            val date = dateInput.text.toString()
             val category = categoryInput.text.toString()
             val workDescription = workDescriptionInput.text.toString()
             val startTime = startTimeInput.text.toString()
@@ -123,14 +131,15 @@ class TimesheetEntry : AppCompatActivity() {
             // Check if any of the fields are empty
             when {
                 projectName.isEmpty() -> Toast.makeText(this, "Please fill in the Project Name", Toast.LENGTH_SHORT).show()
+                startTime.isEmpty() -> Toast.makeText(this, "Please Pick The Start Time", Toast.LENGTH_SHORT).show()
                 category.isEmpty() -> Toast.makeText(this, "Please fill in the Category", Toast.LENGTH_SHORT).show()
-                workDescription.isEmpty() -> Toast.makeText(this, "Please fill in the Work Description", Toast.LENGTH_SHORT).show()
                 startTime.isEmpty() -> Toast.makeText(this, "Please Pick The Start Time", Toast.LENGTH_SHORT).show()
                 endTime.isEmpty() -> Toast.makeText(this, "Please Pick The End Time", Toast.LENGTH_SHORT).show()
                 minimumDailyHours.isEmpty() -> Toast.makeText(this, "Please Pick the Minimum Daily Hours", Toast.LENGTH_SHORT).show()
                 maximumDailyHours.isEmpty() -> Toast.makeText(this, "Please Pick the Maximum Daily Hours", Toast.LENGTH_SHORT).show()
                 totalDuration.isEmpty() -> Toast.makeText(this, "Please fill in the Total Duration", Toast.LENGTH_SHORT).show()
-                else -> saveToDatabase(projectName, category, workDescription, startTime, endTime, minimumDailyHours, maximumDailyHours,totalDuration, imageUri)
+                workDescription.isEmpty() -> Toast.makeText(this, "Please fill in the Work Description", Toast.LENGTH_SHORT).show()
+                else -> saveToDatabase(projectName, date, category, startTime, endTime, minimumDailyHours, maximumDailyHours, totalDuration, workDescription, imageUri)
             }
         }
     }
@@ -174,15 +183,17 @@ class TimesheetEntry : AppCompatActivity() {
         timePickerDialog.show()
     }
 
+    // Function to save data to the database
     private fun saveToDatabase(
         projectName: String,
+        date: String,
         category: String,
-        workDescription: String,
         startTime: String,
         endTime: String,
         minimumDailyHours: String,
         maximumDailyHours: String,
         totalDuration: String,
+        workDescription: String,
         // Pass the image URI as a parameter
         imageUri: Uri?
     ) {
@@ -193,13 +204,15 @@ class TimesheetEntry : AppCompatActivity() {
         // Construct a TimesheetEntry object
         val entry = TimesheetEntryData(
             projectName,
+            date,
+            category,
             startTime,
             endTime,
-            category,
             minimumDailyHours,
             maximumDailyHours,
-            workDescription,
-            totalDuration
+            totalDuration,
+            workDescription
+
         )
 
         if (uid != null) {
@@ -211,15 +224,29 @@ class TimesheetEntry : AppCompatActivity() {
                         browseFilesButton.setImageResource(R.drawable.ic_image_uploaded)
                     } }
                     Toast.makeText(this@TimesheetEntry, "Data Successfully Saved", Toast.LENGTH_SHORT).show()
+                    // Clear input fields
+                    clearFields()
                 } else {
-                    Toast.makeText(this@TimesheetEntry, "Failed To Save Timesheet Entry", Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(this@TimesheetEntry, "Failed To Save Timesheet Entry", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-
+    // Function to clear all input fields
+    private fun clearFields() {
+        projectNameInput.text?.clear()
+        dateInput.text?.clear()
+        categoryInput.text?.clear()
+        startTimeInput.text?.clear()
+        endTimeInput.text?.clear()
+        minimumDailyHoursInput.text?.clear()
+        maximumDailyHoursInput.text?.clear()
+        totalDuration.text?.clear()
+        workDescriptionInput.text?.clear()
+        // Clear the image URI as well
+        imageUri = null
+    }
     private fun openImagePicker() {
         AlertDialog.Builder(this)
             .setTitle("Select Action")
@@ -322,12 +349,14 @@ class TimesheetEntry : AppCompatActivity() {
 
     data class TimesheetEntryData(
         var projectName: String? = null,
+        var date: String? = null,
+        var category: String? = null,
         var startTime: String? = null,
         var endTime: String? = null,
-        var category: String? = null,
         var minimumDailyHours: String? = null,
         var maximumDailyHours: String? = null,
+        var totalDuration: String? = null,
         var workDescription: String? = null,
-        var totalDuration: String? = null
+
     )
 }

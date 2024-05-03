@@ -102,8 +102,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:hint="@string/pick_start_time"
-            android:inputType="time"
-            android:focusable="false" />
+            android:inputType="time" />
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/maximumDailyHoursInput"
@@ -111,8 +110,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:hint="@string/pick_end_time"
-            android:inputType="time"
-            android:focusable="false" />
+            android:inputType="time"/>
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/totalDuration"

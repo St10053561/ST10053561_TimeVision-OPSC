@@ -1,7 +1,9 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    // Add the Google services Gradle plugin
     id("com.google.gms.google-services")
+
 }
 
 android {
@@ -34,6 +36,9 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    buildFeatures{
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -44,15 +49,15 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.database)
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // adding a implementation of card view
-    implementation("androidx.cardview:cardview:1.0.0")
+    
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
 
-    //Adding the implementation for the date range picker
-    implementation("com.google.android.material:material:1.8.0")
-    //Adding the link here for github
-    implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
+    implementation("com.google.firebase:firebase-analytics")
+
 }

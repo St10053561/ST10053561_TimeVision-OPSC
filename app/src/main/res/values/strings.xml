@@ -27,5 +27,5 @@
     <string name="select_date">Select Date</string>
     <string name="enter_project_name">Enter Project Name</string>
     <string name="browse_files">Browse Files</string>
-    <string name="picture_upload">Picture Upload</string>
+    <string name="picture_upload">Take Picture/Upload Image</string>
 </resources>

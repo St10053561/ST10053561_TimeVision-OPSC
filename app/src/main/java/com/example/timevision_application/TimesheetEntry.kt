@@ -1,21 +1,30 @@
 package com.example.timevision_application
 
+import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
+import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.io.ByteArrayOutputStream
 import java.util.*
 
 class TimesheetEntry : AppCompatActivity() {
@@ -23,6 +32,9 @@ class TimesheetEntry : AppCompatActivity() {
     // Companion object for constants
     companion object {
         private const val IMAGE_PICKER_REQUEST_CODE = 100
+        private const val CAMERA_REQUEST_CODE = 101
+        private const val CAMERA_PERMISSION_REQUEST_CODE = 102
+        private const val WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 103
     }
 
     // Global Variables
@@ -108,10 +120,20 @@ class TimesheetEntry : AppCompatActivity() {
             val maximumDailyHours = maximumDailyHoursInput.text.toString()
             val totalDuration = totalDuration.text.toString()
 
-            saveToDatabase(projectName, category, workDescription, startTime, endTime, minimumDailyHours, maximumDailyHours,totalDuration, imageUri)
+            // Check if any of the fields are empty
+            when {
+                projectName.isEmpty() -> Toast.makeText(this, "Please fill in the Project Name", Toast.LENGTH_SHORT).show()
+                category.isEmpty() -> Toast.makeText(this, "Please fill in the Category", Toast.LENGTH_SHORT).show()
+                workDescription.isEmpty() -> Toast.makeText(this, "Please fill in the Work Description", Toast.LENGTH_SHORT).show()
+                startTime.isEmpty() -> Toast.makeText(this, "Please Pick The Start Time", Toast.LENGTH_SHORT).show()
+                endTime.isEmpty() -> Toast.makeText(this, "Please Pick The End Time", Toast.LENGTH_SHORT).show()
+                minimumDailyHours.isEmpty() -> Toast.makeText(this, "Please Pick the Minimum Daily Hours", Toast.LENGTH_SHORT).show()
+                maximumDailyHours.isEmpty() -> Toast.makeText(this, "Please Pick the Maximum Daily Hours", Toast.LENGTH_SHORT).show()
+                totalDuration.isEmpty() -> Toast.makeText(this, "Please fill in the Total Duration", Toast.LENGTH_SHORT).show()
+                else -> saveToDatabase(projectName, category, workDescription, startTime, endTime, minimumDailyHours, maximumDailyHours,totalDuration, imageUri)
+            }
         }
     }
-
 
     private fun showDatePicker(textInputEditText: TextInputEditText) {
         val calendar = Calendar.getInstance()
@@ -184,7 +206,10 @@ class TimesheetEntry : AppCompatActivity() {
             databaseReference.child(uid).setValue(entry).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // If data saving is successful, upload the image
-                    imageUri?.let { uploadImage(it) }
+                    imageUri?.let { uploadImage(it) {
+                        // Update browseFilesButton after successful upload
+                        browseFilesButton.setImageResource(R.drawable.ic_image_uploaded)
+                    } }
                     Toast.makeText(this@TimesheetEntry, "Data Successfully Saved", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(this@TimesheetEntry, "Failed To Save Timesheet Entry", Toast.LENGTH_SHORT
@@ -194,13 +219,38 @@ class TimesheetEntry : AppCompatActivity() {
         }
     }
 
+
     private fun openImagePicker() {
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        startActivityForResult(intent, IMAGE_PICKER_REQUEST_CODE)
+        AlertDialog.Builder(this)
+            .setTitle("Select Action")
+            .setItems(arrayOf("Take Photo", "Choose from Gallery")) { _, which ->
+                when (which) {
+                    0 -> openCamera() // Take Photo
+                    1 -> openGallery() // Choose from Gallery
+                }
+            }
+            .show()
     }
 
-    private fun uploadImage(imageUri: Uri) {
+    private fun openCamera() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted, request it
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
+        } else {
+            // Permission is granted, open the camera
+            val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            if (takePictureIntent.resolveActivity(packageManager) != null) {
+                startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE)
+            }
+        }
+    }
+
+    private fun openGallery() {
+        val pickPhotoIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(pickPhotoIntent, IMAGE_PICKER_REQUEST_CODE)
+    }
+
+    private fun uploadImage(imageUri: Uri, onSuccess: () -> Unit) {
         // Storage reference to the root path where images will be stored
         val storageReference = FirebaseStorage.getInstance().reference
         // Create a reference to the location where the image will be stored
@@ -210,6 +260,7 @@ class TimesheetEntry : AppCompatActivity() {
         // Upload the image to Firebase Storage
         imageRef.putFile(imageUri)
             .addOnSuccessListener {
+                onSuccess()
                 Toast.makeText(this@TimesheetEntry, "Image Successfully Uploaded", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener {
@@ -219,14 +270,54 @@ class TimesheetEntry : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == IMAGE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
-            // Handle the selected image URI here
-            val selectedImageUri: Uri? = data?.data
-            if (selectedImageUri != null) {
-                // Save the selected image URI
-                imageUri = selectedImageUri
+        if (resultCode == RESULT_OK) {
+            when (requestCode) {
+                IMAGE_PICKER_REQUEST_CODE -> {
+                    // Handle the selected image URI here
+                    val selectedImageUri: Uri? = data?.data
+                    if (selectedImageUri != null) {
+                        // Save the selected image URI
+                        imageUri = selectedImageUri
+                    }
+                }
+                CAMERA_REQUEST_CODE -> {
+                    val photo: Bitmap = data?.extras?.get("data") as Bitmap
+                    // Check for WRITE_EXTERNAL_STORAGE permission before converting bitmap to Uri
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        // Permission is not granted, request it
+                        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE)
+                    } else {
+                        // Permission is granted, proceed with getting the image URI
+                        imageUri = getImageUri(photo)
+                    }
+                }
             }
         }
+    }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            CAMERA_PERMISSION_REQUEST_CODE -> {
+                // existing code...
+            }
+            WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // Permission was granted, you can now write to external storage
+                } else {
+                    // Permission was denied. You can show a message to the user explaining why the permission is necessary.
+                    Toast.makeText(this, "Storage permission is required to save images", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+            // Handle other permission results
+        }
+    }
+
+    private fun getImageUri(inImage: Bitmap): Uri {
+        val bytes = ByteArrayOutputStream()
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+        val path = MediaStore.Images.Media.insertImage(contentResolver, inImage, "Title", null)
+        return Uri.parse(path)
     }
 
     data class TimesheetEntryData(

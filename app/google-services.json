@@ -1,0 +1,106 @@
+{
+  "project_info": {
+    "project_number": "52727235322",
+    "firebase_url": "https://timekeeper-3b842-default-rtdb.firebaseio.com",
+    "project_id": "timekeeper-3b842",
+    "storage_bucket": "timekeeper-3b842.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52727235322:android:5d12a705e045e7f573ff43",
+        "android_client_info": {
+          "package_name": "Absence.AndroidStudio.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_TvqCmdOK8k5NqVPOgXf2sEf8nF2HMbU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52727235322:android:3a7ea6622a2331cb73ff43",
+        "android_client_info": {
+          "package_name": "com.example.abdul_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_TvqCmdOK8k5NqVPOgXf2sEf8nF2HMbU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52727235322:android:476384ee2a8d66f573ff43",
+        "android_client_info": {
+          "package_name": "com.example.absence"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_TvqCmdOK8k5NqVPOgXf2sEf8nF2HMbU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52727235322:android:e6bc0c4f72af041673ff43",
+        "android_client_info": {
+          "package_name": "com.example.tableviewproject_opsc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_TvqCmdOK8k5NqVPOgXf2sEf8nF2HMbU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52727235322:android:3e2598664171df8373ff43",
+        "android_client_info": {
+          "package_name": "com.example.timevision_application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_TvqCmdOK8k5NqVPOgXf2sEf8nF2HMbU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

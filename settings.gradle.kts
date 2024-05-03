@@ -16,6 +16,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
+        //Adding the jetpack repository for charts
+        maven("https://jitpack.io")
+
+        //Adding the repository for JitPack
+        maven { url = uri("https://jitpack.io") }
     }
 }
 

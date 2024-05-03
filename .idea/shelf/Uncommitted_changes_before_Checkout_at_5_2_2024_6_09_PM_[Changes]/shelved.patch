@@ -1,0 +1,822 @@
+Index: app/google-services.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/google-services.json b/app/google-services.json
+new file mode 100644
+--- /dev/null	(date 1714665903953)
++++ b/app/google-services.json	(date 1714665903953)
+@@ -0,0 +1,87 @@
++{
++  "project_info": {
++    "project_number": "52727235322",
++    "firebase_url": "https://timekeeper-3b842-default-rtdb.firebaseio.com",
++    "project_id": "timekeeper-3b842",
++    "storage_bucket": "timekeeper-3b842.appspot.com"
++  },
++  "client": [
++    {
++      "client_info": {
++        "mobilesdk_app_id": "1:52727235322:android:5d12a705e045e7f573ff43",
++        "android_client_info": {
++          "package_name": "Absence.AndroidStudio.com"
++        }
++      },
++      "oauth_client": [],
++      "api_key": [
++        {
++          "current_key": "AIzaSyC_TvqCmdOK8k5NqVPOgXf2sEf8nF2HMbU"
++        }
++      ],
++      "services": {
++        "appinvite_service": {
++          "other_platform_oauth_client": []
++        }
++      }
++    },
++    {
++      "client_info": {
++        "mobilesdk_app_id": "1:52727235322:android:3a7ea6622a2331cb73ff43",
++        "android_client_info": {
++          "package_name": "com.example.abdul_project"
++        }
++      },
++      "oauth_client": [],
++      "api_key": [
++        {
++          "current_key": "AIzaSyC_TvqCmdOK8k5NqVPOgXf2sEf8nF2HMbU"
++        }
++      ],
++      "services": {
++        "appinvite_service": {
++          "other_platform_oauth_client": []
++        }
++      }
++    },
++    {
++      "client_info": {
++        "mobilesdk_app_id": "1:52727235322:android:476384ee2a8d66f573ff43",
++        "android_client_info": {
++          "package_name": "com.example.absence"
++        }
++      },
++      "oauth_client": [],
++      "api_key": [
++        {
++          "current_key": "AIzaSyC_TvqCmdOK8k5NqVPOgXf2sEf8nF2HMbU"
++        }
++      ],
++      "services": {
++        "appinvite_service": {
++          "other_platform_oauth_client": []
++        }
++      }
++    },
++    {
++      "client_info": {
++        "mobilesdk_app_id": "1:52727235322:android:3e2598664171df8373ff43",
++        "android_client_info": {
++          "package_name": "com.example.timevision_application"
++        }
++      },
++      "oauth_client": [],
++      "api_key": [
++        {
++          "current_key": "AIzaSyC_TvqCmdOK8k5NqVPOgXf2sEf8nF2HMbU"
++        }
++      ],
++      "services": {
++        "appinvite_service": {
++          "other_platform_oauth_client": []
++        }
++      }
++    }
++  ],
++  "configuration_version": "1"
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/timevision_application/DatePickerActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/DatePickerActivity.kt b/app/src/main/java/com/example/timevision_application/DatePickerActivity.kt
+new file mode 100644
+--- /dev/null	(date 1714665903953)
++++ b/app/src/main/java/com/example/timevision_application/DatePickerActivity.kt	(date 1714665903953)
+@@ -0,0 +1,51 @@
++package com.example.timevision_application
++
++import android.app.Activity
++import android.content.Intent
++import android.icu.text.SimpleDateFormat
++import android.os.Bundle
++import android.widget.Toast
++import androidx.appcompat.app.AppCompatActivity
++import com.google.android.material.datepicker.MaterialDatePicker
++import java.util.Date
++import java.util.Locale
++
++class DatePickerActivity : AppCompatActivity() {
++    override fun onCreate(savedInstanceState: Bundle?) {
++        super.onCreate(savedInstanceState)
++
++        // Create a date range picker
++        val materialDatePicker = MaterialDatePicker.Builder.dateRangePicker()
++            // Set the title of the date picker
++            .setTitleText("Select Date")
++            // Set the initial selection to be from the start of this month to today
++            .setSelection(
++                androidx.core.util.Pair(
++                    MaterialDatePicker.thisMonthInUtcMilliseconds(),
++                    MaterialDatePicker.todayInUtcMilliseconds()
++                )
++            )
++            // Set the text of the confirmation button
++            .setPositiveButtonText("Submit")
++
++            .build()
++
++// Set what happens when the confirmation button is clicked
++        materialDatePicker.addOnPositiveButtonClickListener { pair ->
++            // Create a new intent
++            val intent = Intent()
++            // Put the start and end dates in the intent
++            intent.putExtra("startDate", pair.first)
++            intent.putExtra("endDate", pair.second)
++
++            setResult(Activity.RESULT_OK, intent) // Set the result of this activity to be the intent
++
++            finish()
++        }
++
++// Show the date picker
++        materialDatePicker.show(supportFragmentManager, "DATE_PICKER")
++
++
++    }
++}
+\ No newline at end of file
+Index: build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>buildscript {\r\n    dependencies {\r\n        classpath(\"com.google.gms:google-services:4.4.1\")\r\n    }\r\n}\r\n// Top-level build file where you can add configuration options common to all sub-projects/modules.\r\nplugins {\r\n    alias(libs.plugins.androidApplication) apply false\r\n    alias(libs.plugins.jetbrainsKotlinAndroid) apply false\r\n    // Add the dependency for the Google services Gradle plugin\r\n    id(\"com.google.gms.google-services\") version \"4.4.1\" apply false\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/build.gradle.kts b/build.gradle.kts
+--- a/build.gradle.kts	(revision 8fcf9c6921ca4e6b7035265b3903381b0b1d0245)
++++ b/build.gradle.kts	(date 1714665898140)
+@@ -3,6 +3,11 @@
+         classpath("com.google.gms:google-services:4.4.1")
+     }
+ }
++buildscript {
++    dependencies {
++        classpath(libs.google.services)
++    }
++}
+ // Top-level build file where you can add configuration options common to all sub-projects/modules.
+ plugins {
+     alias(libs.plugins.androidApplication) apply false
+Index: settings.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>pluginManagement {\r\n    repositories {\r\n        google {\r\n            content {\r\n                includeGroupByRegex(\"com\\\\.android.*\")\r\n                includeGroupByRegex(\"com\\\\.google.*\")\r\n                includeGroupByRegex(\"androidx.*\")\r\n            }\r\n        }\r\n        mavenCentral()\r\n        gradlePluginPortal()\r\n    }\r\n}\r\ndependencyResolutionManagement {\r\n    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)\r\n    repositories {\r\n        google()\r\n        mavenCentral()\r\n    }\r\n}\r\n\r\nrootProject.name = \"TimeVision_Application\"\r\ninclude(\":app\")\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+--- a/settings.gradle.kts	(revision 8fcf9c6921ca4e6b7035265b3903381b0b1d0245)
++++ b/settings.gradle.kts	(date 1714665898146)
+@@ -16,6 +16,12 @@
+     repositories {
+         google()
+         mavenCentral()
++
++        //Adding the jetpack repository for charts
++        maven("https://jitpack.io")
++
++        //Adding the repository for JitPack
++        maven { url = uri("https://jitpack.io") }
+     }
+ }
+ 
+Index: app/src/main/java/com/example/timevision_application/ProjectAdapter.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/ProjectAdapter.kt b/app/src/main/java/com/example/timevision_application/ProjectAdapter.kt
+new file mode 100644
+--- /dev/null	(date 1714665904015)
++++ b/app/src/main/java/com/example/timevision_application/ProjectAdapter.kt	(date 1714665904015)
+@@ -0,0 +1,53 @@
++package com.example.timevision_application
++
++import Project
++import android.content.Intent
++import android.view.LayoutInflater
++import android.view.View
++import android.view.ViewGroup
++import android.widget.Button
++import android.widget.TextView
++import androidx.recyclerview.widget.RecyclerView
++
++// Define the ProjectAdapter class which extends RecyclerView.Adapter. It takes a list of Project objects as input.
++class ProjectAdapter(private val projectList: List<Project>) :
++    RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder>() {
++
++    // Define the ProjectViewHolder class inside the ProjectAdapter. It holds the views for one item in the RecyclerView.
++    inner class ProjectViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
++        // Get the TextViews from the layout of one item
++        val projectName: TextView = itemView.findViewById(R.id.projectName)
++        val projectcategory: TextView = itemView.findViewById(R.id.projectCategory)
++        val viewDetailsButton: Button = itemView.findViewById(R.id.viewDetailsButton)
++
++        init {
++            viewDetailsButton.setOnClickListener {
++                val intent = Intent(itemView.context, ProjectDetailActivity::class.java)
++                intent.putExtra("project", projectList[adapterPosition])
++                itemView.context.startActivity(intent)
++            }
++        }
++
++
++    }
++
++
++    // Create a new ViewHolder with the layout of one item
++    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProjectViewHolder {
++        val itemView =
++            LayoutInflater.from(parent.context).inflate(R.layout.card_item, parent, false)
++        return ProjectViewHolder(itemView)
++    }
++
++    // Set the data of one item
++    override fun onBindViewHolder(holder: ProjectViewHolder, position: Int) {
++        val currentItem = projectList[position]
++        holder.projectName.text = currentItem.projectname
++        holder.projectcategory.text = currentItem.category
++
++    }
++
++
++    // Return the size of the project list
++    override fun getItemCount() = projectList.size
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/timevision_application/Project.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/Project.kt b/app/src/main/java/com/example/timevision_application/Project.kt
+new file mode 100644
+--- /dev/null	(date 1714665904028)
++++ b/app/src/main/java/com/example/timevision_application/Project.kt	(date 1714665904028)
+@@ -0,0 +1,14 @@
++package com.example.timevision_application
++
++import java.io.Serializable
++
++data class Project(
++    val projectname: String,
++    val category: String,
++    val description : String,
++    val minHours: Int,
++    val maxHours: Int,
++    val userPhoto: Int,
++    val projectDate: String,
++    val totalHours: List<Int> // Adding a property for each day hours of a week.
++) : Serializable
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_chart.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_chart.xml b/app/src/main/res/layout/activity_chart.xml
+new file mode 100644
+--- /dev/null	(date 1714665904028)
++++ b/app/src/main/res/layout/activity_chart.xml	(date 1714665904028)
+@@ -0,0 +1,21 @@
++<?xml version="1.0" encoding="utf-8"?>
++<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:layout_marginTop="30dp">
++
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:orientation="vertical"
++        android:padding="16dp">
++
++        <com.anychart.AnyChartView
++            android:id="@+id/any_chart_view"
++            android:layout_width="418dp"
++            android:layout_height="466dp" />
++
++    </LinearLayout>
++
++</ScrollView>
+\ No newline at end of file
+Index: .idea/compiler.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+new file mode 100644
+--- /dev/null	(date 1714665904046)
++++ b/.idea/compiler.xml	(date 1714665904046)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="CompilerConfiguration">
++    <bytecodeTargetLevel target="17" />
++  </component>
++</project>
+\ No newline at end of file
+Index: app/src/main/res/layout/datepicker_button.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/datepicker_button.xml b/app/src/main/res/layout/datepicker_button.xml
+new file mode 100644
+--- /dev/null	(date 1714665903964)
++++ b/app/src/main/res/layout/datepicker_button.xml	(date 1714665903964)
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="utf-8"?>
++<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent">
++
++    <Button
++        android:id="@+id/openDatePickerButton"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:text="Open Date Picker" />
++
++</LinearLayout>
+\ No newline at end of file
+Index: app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt b/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt
+new file mode 100644
+--- /dev/null	(date 1714665903984)
++++ b/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt	(date 1714665903984)
+@@ -0,0 +1,51 @@
++package com.example.timevision_application
++
++import android.annotation.SuppressLint
++import android.os.Bundle
++import android.widget.Button
++import android.widget.ImageView
++import android.widget.TextView
++import androidx.appcompat.app.AppCompatActivity
++import com.anychart.AnyChart
++import com.anychart.AnyChartView
++import com.anychart.chart.common.dataentry.DataEntry
++import com.anychart.chart.common.dataentry.ValueDataEntry
++import com.anychart.charts.Cartesian
++import com.anychart.core.cartesian.series.Line
++import com.anychart.data.Mapping
++
++class ProjectDetailActivity :
++    AppCompatActivity() { // Define a new activity called ProjectDetailActivity
++    @SuppressLint("SetTextI18n")
++    override fun onCreate(savedInstanceState: Bundle?) {
++        super.onCreate(savedInstanceState) // Call the superclass onCreate() method
++        setContentView(R.layout.activity_project_detail) // Set the layout for this activity
++
++        //Find the views by their IDs
++        val projectName: TextView = findViewById(R.id.projectName)
++        val projectCategory: TextView = findViewById(R.id.projectCategory)
++        val description: TextView = findViewById(R.id.description)
++        val hours: TextView = findViewById(R.id.hours)
++        val userPhoto: ImageView = findViewById(R.id.userPhoto)
++        val projectDate: TextView = findViewById(R.id.projectDate)
++
++        // Retrieve the project object from the previous activity
++        val project = intent.getSerializableExtra("project") as? Project
++
++        if (project != null) {
++            projectName.text = project.projectname
++            projectCategory.text = projectCategory.text.toString() + project.category
++            description.text = description.text.toString() + "\n" + project.description
++            hours.text = hours.text.toString() + "${project.minHours} - ${project.maxHours}"
++            userPhoto.setImageResource(project.userPhoto)
++            projectDate.text = projectDate.text.toString() + project.projectDate
++
++            //here I am linking the anyChartView to the layout to show the total hours of the project
++            val anyChartView: AnyChartView = findViewById(R.id.any_chart_view)
++            ChartsActivity.ChartUtils.setupLineChart(anyChartView, project.totalHours)
++        }
++
++
++    }
++
++}
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_project_detail.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_project_detail.xml b/app/src/main/res/layout/activity_project_detail.xml
+new file mode 100644
+--- /dev/null	(date 1714665903984)
++++ b/app/src/main/res/layout/activity_project_detail.xml	(date 1714665903984)
+@@ -0,0 +1,79 @@
++<?xml version="1.0" encoding="utf-8"?>
++<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:layout_marginTop="30dp">
++
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:orientation="vertical"
++        android:padding="16dp">
++
++        <RelativeLayout
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content">
++
++            <ImageView
++                android:id="@+id/userPhoto"
++                android:layout_width="100dp"
++                android:layout_height="100dp"
++                android:layout_alignParentEnd="true"
++                android:layout_marginEnd="27dp" />
++
++            <TextView
++                android:id="@+id/projectName"
++                android:layout_width="wrap_content"
++                android:layout_height="wrap_content"
++                android:layout_marginEnd="180dp"
++                android:layout_toStartOf="@id/userPhoto"
++                android:text="Project Name"
++                android:textSize="18sp"
++                android:textStyle="bold" />
++
++        </RelativeLayout>
++
++        <Space
++            android:layout_width="match_parent"
++            android:layout_height="12dp" />
++
++        <TextView
++            android:id="@+id/projectCategory"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="8dp"
++            android:text="Project Category: "
++            android:textSize="16sp" />
++
++        <TextView
++            android:id="@+id/description"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="8dp"
++            android:text="Project Description: "
++            android:textSize="16sp" />
++
++        <TextView
++            android:id="@+id/hours"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="8dp"
++            android:text="Working Hours (Min - Max): "
++            android:textSize="16sp" />
++
++        <TextView
++            android:id="@+id/projectDate"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="8dp"
++            android:text="Project Start Date: "
++            android:textSize="16sp" />
++
++
++
++        <include layout="@layout/activity_chart" />
++    </LinearLayout>
++
++
++</ScrollView>
+\ No newline at end of file
+Index: app/src/main/res/layout/card_item.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/card_item.xml b/app/src/main/res/layout/card_item.xml
+new file mode 100644
+--- /dev/null	(date 1714665904015)
++++ b/app/src/main/res/layout/card_item.xml	(date 1714665904015)
+@@ -0,0 +1,77 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    android:id="@+id/cardView"
++    android:layout_width="match_parent"
++    android:layout_height="wrap_content"
++    android:layout_marginStart="16dp"
++    android:layout_marginTop="20dp"
++    android:layout_marginEnd="16dp"
++    app:cardCornerRadius="8dp"
++    app:cardElevation="8dp"
++    app:layout_constraintTop_toTopOf="parent">
++
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        android:orientation="vertical"
++        android:padding="16dp">
++
++        <TextView
++            android:id="@+id/projectName"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="Project Name"
++            android:textSize="18sp"
++            android:textStyle="bold" />
++
++        <TextView
++            android:id="@+id/projectCategory"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="8dp"
++            android:text="Project Category"
++            android:textSize="16sp" />
++
++
++        <TextView
++            android:id="@+id/description"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="Description"
++            android:textSize="16sp"
++            android:visibility="gone" />
++
++        <TextView
++            android:id="@+id/hours"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="Hours"
++            android:textSize="16sp"
++            android:visibility="gone" />
++
++        <TextView
++            android:id="@+id/userPhoto"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="Photo"
++            android:visibility="gone" />
++
++        <TextView
++            android:id="@+id/projectDate"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:text="Date"
++            android:textSize="16sp"
++            android:visibility="gone" />
++
++        <Button
++            android:id="@+id/viewDetailsButton"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="16dp"
++            android:text="View Details" />
++
++    </LinearLayout>
++
++</androidx.cardview.widget.CardView>
+\ No newline at end of file
+Index: gradle/libs.versions.toml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>[versions]\r\nagp = \"8.3.2\"\r\nkotlin = \"1.9.0\"\r\ncoreKtx = \"1.13.0\"\r\njunit = \"4.13.2\"\r\njunitVersion = \"1.1.5\"\r\nespressoCore = \"3.5.1\"\r\nappcompat = \"1.6.1\"\r\nmaterial = \"1.11.0\"\r\nactivity = \"1.8.0\"\r\nconstraintlayout = \"2.1.4\"\r\ngoogleServices = \"4.4.1\"\r\nfirebaseDatabase = \"20.3.1\"\r\nfirebaseAuthKtx = \"22.3.1\"\r\n\r\n[libraries]\r\nandroidx-core-ktx = { group = \"androidx.core\", name = \"core-ktx\", version.ref = \"coreKtx\" }\r\njunit = { group = \"junit\", name = \"junit\", version.ref = \"junit\" }\r\nandroidx-junit = { group = \"androidx.test.ext\", name = \"junit\", version.ref = \"junitVersion\" }\r\nandroidx-espresso-core = { group = \"androidx.test.espresso\", name = \"espresso-core\", version.ref = \"espressoCore\" }\r\nandroidx-appcompat = { group = \"androidx.appcompat\", name = \"appcompat\", version.ref = \"appcompat\" }\r\nmaterial = { group = \"com.google.android.material\", name = \"material\", version.ref = \"material\" }\r\nandroidx-activity = { group = \"androidx.activity\", name = \"activity\", version.ref = \"activity\" }\r\nandroidx-constraintlayout = { group = \"androidx.constraintlayout\", name = \"constraintlayout\", version.ref = \"constraintlayout\" }\r\ngoogle-services = { group = \"com.google.gms\", name = \"google-services\", version.ref = \"googleServices\" }\r\nfirebase-database = { group = \"com.google.firebase\", name = \"firebase-database\", version.ref = \"firebaseDatabase\" }\r\nfirebase-auth-ktx = { group = \"com.google.firebase\", name = \"firebase-auth-ktx\", version.ref = \"firebaseAuthKtx\" }\r\n\r\n[plugins]\r\nandroidApplication = { id = \"com.android.application\", version.ref = \"agp\" }\r\njetbrainsKotlinAndroid = { id = \"org.jetbrains.kotlin.android\", version.ref = \"kotlin\" }\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+--- a/gradle/libs.versions.toml	(revision 8fcf9c6921ca4e6b7035265b3903381b0b1d0245)
++++ b/gradle/libs.versions.toml	(date 1714665904257)
+@@ -9,9 +9,6 @@
+ material = "1.11.0"
+ activity = "1.8.0"
+ constraintlayout = "2.1.4"
+-googleServices = "4.4.1"
+-firebaseDatabase = "20.3.1"
+-firebaseAuthKtx = "22.3.1"
+ 
+ [libraries]
+ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+@@ -22,9 +19,6 @@
+ material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+ androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+-google-services = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
+-firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
+-firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
+ 
+ [plugins]
+ androidApplication = { id = "com.android.application", version.ref = "agp" }
+Index: .idea/migrations.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/migrations.xml b/.idea/migrations.xml
+new file mode 100644
+--- /dev/null	(date 1714665904046)
++++ b/.idea/migrations.xml	(date 1714665904046)
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectMigrations">
++    <option name="MigrateToGradleLocalJavaHome">
++      <set>
++        <option value="$PROJECT_DIR$" />
++      </set>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/kotlinc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/kotlinc.xml b/.idea/kotlinc.xml
+new file mode 100644
+--- /dev/null	(date 1714665908421)
++++ b/.idea/kotlinc.xml	(date 1714665908421)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="KotlinJpsPluginSettings">
++    <option name="version" value="1.9.0" />
++  </component>
++</project>
+\ No newline at end of file
+Index: app/src/main/java/com/example/timevision_application/ChartsActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/ChartsActivity.kt b/app/src/main/java/com/example/timevision_application/ChartsActivity.kt
+new file mode 100644
+--- /dev/null	(date 1714665908453)
++++ b/app/src/main/java/com/example/timevision_application/ChartsActivity.kt	(date 1714665908453)
+@@ -0,0 +1,65 @@
++package com.example.timevision_application
++
++import android.os.Bundle
++import androidx.appcompat.app.AppCompatActivity
++import com.anychart.AnyChart
++import com.anychart.AnyChartView
++import com.anychart.chart.common.dataentry.DataEntry
++import com.anychart.chart.common.dataentry.ValueDataEntry
++import com.anychart.charts.Cartesian
++import com.anychart.core.cartesian.series.Line
++import com.anychart.data.Mapping
++import kotlin.random.Random
++
++class ChartsActivity : AppCompatActivity() {
++    override fun onCreate(savedInstanceState: Bundle?) {
++        super.onCreate(savedInstanceState)
++        setContentView(R.layout.activity_chart)
++
++
++    }
++
++    object ChartUtils {
++        // Function to set up the line chart
++        fun setupLineChart(anyChartView: AnyChartView, hours: List<Int>) {
++            // Create a line chart
++            val cartesian: Cartesian = AnyChart.line()
++
++            // Initialize a list to store the data entries for the chart
++            val data: MutableList<DataEntry> = ArrayList()
++            // List of days of the week
++            val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
++            // Loop through each day of the week
++            for (i in 0 until 7) {
++                // Add a new data entry for each day with the corresponding hours
++                data.add(ValueDataEntry(daysOfWeek[i], hours[i]))
++            }
++
++            // Create a set of data and add the data entries to it
++            val set: com.anychart.data.Set = com.anychart.data.Set.instantiate()
++            set.data(data)
++
++            // Map the data for the line chart
++            val lineData: Mapping = set.mapAs("{ x: 'x', value: 'value' }")
++            // Create a line series with the mapped data
++            val series: Line = cartesian.line(lineData)
++
++            // Set the stroke settings for the line
++            series.stroke("blue", 2f, "10 5", "round", "round")
++
++            // Set the title of the chart
++            cartesian.title("Weekly Category Data")
++
++            // Set the title of the x-axis and y-axis
++            cartesian.xAxis(0).title("Days")
++            cartesian.yAxis(0).title("Hours")
++
++            // Enable tooltips for the chart
++            cartesian.tooltip().enabled(true)
++
++            // Set the chart in the AnyChartView
++            anyChartView.setChart(cartesian)
++        }
++    }
++
++}
+\ No newline at end of file
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"resolveExternalAnnotations\" value=\"false\" />\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+--- a/.idea/gradle.xml	(revision 8fcf9c6921ca4e6b7035265b3903381b0b1d0245)
++++ b/.idea/gradle.xml	(date 1714665908435)
+@@ -4,6 +4,13 @@
+     <option name="linkedExternalProjectsSettings">
+       <GradleProjectSettings>
+         <option name="externalProjectPath" value="$PROJECT_DIR$" />
++        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
++        <option name="modules">
++          <set>
++            <option value="$PROJECT_DIR$" />
++            <option value="$PROJECT_DIR$/app" />
++          </set>
++        </option>
+         <option name="resolveExternalAnnotations" value="false" />
+       </GradleProjectSettings>
+     </option>
+Index: app/build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    alias(libs.plugins.androidApplication)\r\n    alias(libs.plugins.jetbrainsKotlinAndroid)\r\n    // Add the Google services Gradle plugin\r\n    id(\"com.google.gms.google-services\")\r\n\r\n}\r\n\r\nandroid {\r\n    namespace = \"com.example.timevision_application\"\r\n    compileSdk = 34\r\n\r\n    defaultConfig {\r\n        applicationId = \"com.example.timevision_application\"\r\n        minSdk = 26\r\n        targetSdk = 34\r\n        versionCode = 1\r\n        versionName = \"1.0\"\r\n\r\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            isMinifyEnabled = false\r\n            proguardFiles(\r\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\r\n                \"proguard-rules.pro\"\r\n            )\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility = JavaVersion.VERSION_1_8\r\n        targetCompatibility = JavaVersion.VERSION_1_8\r\n    }\r\n    kotlinOptions {\r\n        jvmTarget = \"1.8\"\r\n    }\r\n    buildFeatures{\r\n        viewBinding = true\r\n    }\r\n}\r\n\r\ndependencies {\r\n\r\n    implementation(libs.androidx.core.ktx)\r\n    implementation(libs.androidx.appcompat)\r\n    implementation(libs.material)\r\n    implementation(libs.androidx.activity)\r\n    implementation(libs.androidx.constraintlayout)\r\n    implementation(libs.firebase.database)\r\n    implementation(libs.firebase.auth.ktx)\r\n    testImplementation(libs.junit)\r\n    androidTestImplementation(libs.androidx.junit)\r\n    androidTestImplementation(libs.androidx.espresso.core)\r\n\r\n    // Import the Firebase BoM\r\n    implementation(platform(\"com.google.firebase:firebase-bom:32.8.1\"))\r\n\r\n    implementation(\"com.google.firebase:firebase-analytics\")\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+--- a/app/build.gradle.kts	(revision 8fcf9c6921ca4e6b7035265b3903381b0b1d0245)
++++ b/app/build.gradle.kts	(date 1714665903921)
+@@ -1,9 +1,6 @@
+ plugins {
+     alias(libs.plugins.androidApplication)
+     alias(libs.plugins.jetbrainsKotlinAndroid)
+-    // Add the Google services Gradle plugin
+-    id("com.google.gms.google-services")
+-
+ }
+ 
+ android {
+@@ -36,9 +33,6 @@
+     kotlinOptions {
+         jvmTarget = "1.8"
+     }
+-    buildFeatures{
+-        viewBinding = true
+-    }
+ }
+ 
+ dependencies {
+@@ -48,15 +42,7 @@
+     implementation(libs.material)
+     implementation(libs.androidx.activity)
+     implementation(libs.androidx.constraintlayout)
+-    implementation(libs.firebase.database)
+-    implementation(libs.firebase.auth.ktx)
+     testImplementation(libs.junit)
+     androidTestImplementation(libs.androidx.junit)
+     androidTestImplementation(libs.androidx.espresso.core)
+-
+-    // Import the Firebase BoM
+-    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
+-
+-    implementation("com.google.firebase:firebase-analytics")
+-
+ }
+\ No newline at end of file

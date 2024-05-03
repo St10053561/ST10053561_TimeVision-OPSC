@@ -1,11 +1,15 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.timevision_application"
     compileSdk = 34
+    viewBinding{
+        enable = true
+    }
 
     defaultConfig {
         applicationId = "com.example.timevision_application"

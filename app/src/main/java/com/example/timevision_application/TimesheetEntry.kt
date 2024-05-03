@@ -203,7 +203,7 @@ class TimesheetEntry : AppCompatActivity() {
         )
 
         if (uid != null) {
-            databaseReference.child(uid).setValue(entry).addOnCompleteListener { task ->
+            databaseReference.child(uid).push().setValue(entry).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // If data saving is successful, upload the image
                     imageUri?.let { uploadImage(it) {

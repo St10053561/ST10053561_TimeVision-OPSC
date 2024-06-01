@@ -39,6 +39,11 @@
 
         <activity android:name=".AbsenceActivity"/>
 
+        <activity android:name=".Register"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name=".TimesheetEntry" />
+
         <!-- Declare the HomeScreen activity here -->
         <activity android:name=".HomeScreen" />
 

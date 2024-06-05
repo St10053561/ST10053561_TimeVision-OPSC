@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
-
 
     <application
         android:allowBackup="true"
@@ -21,36 +20,18 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!--        //Adding a another activity here-->
         <activity android:name=".ProjectDetailActivity" />
-
-        <!--        //Adding a another activity here-->
         <activity android:name=".DatePickerActivity" />
-
-        <!--        adding a another activity-->
         <activity android:name=".ChartsActivity"/>
-
-        <!-- Add this line for your AddCategoryActivity -->
         <activity android:name=".AddCategoryActivity" />
-
-        <!-- Add this line for your timeTracker-->
         <activity android:name=".TimeTrackerReport" />
-
         <activity android:name=".AbsenceActivity"/>
-
-        <activity android:name=".Register"
-            android:windowSoftInputMode="adjustResize" />
-
+        <activity android:name=".Register" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".TimesheetEntry" />
-
-        <!-- Declare the HomeScreen activity here -->
         <activity android:name=".HomeScreen" />
-
     </application>
-
 </manifest>

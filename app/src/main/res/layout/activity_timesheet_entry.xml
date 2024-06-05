@@ -12,7 +12,7 @@
         android:layout_marginTop="16dp"
         android:src="@drawable/ic_time_vision_logo_remove" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/browseFilesButton"
         android:layout_width="361dp"
         android:layout_height="90dp"
@@ -102,7 +102,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:hint="@string/pick_start_time"
-            android:inputType="time" />
+            android:inputType="number" />
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/maximumDailyHoursInput"
@@ -110,7 +110,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:hint="@string/pick_end_time"
-            android:inputType="time"/>
+            android:inputType="number"/>
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/totalDuration"
@@ -119,7 +119,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/total_duration"
             android:textAlignment="center"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:inputType="number" />
 
     </LinearLayout>
 

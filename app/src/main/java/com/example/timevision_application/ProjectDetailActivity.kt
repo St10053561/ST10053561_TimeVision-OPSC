@@ -23,6 +23,10 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 
 class ProjectDetailActivity : AppCompatActivity() {
+
+    // Declare hoursMap as a member variable
+    private val hoursMap = HashMap<String, MutableList<Int>>()
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,27 +61,36 @@ class ProjectDetailActivity : AppCompatActivity() {
             // Get the current user ID
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
-
             val database = FirebaseDatabase.getInstance().getReference("TimeSheetEntries")
+
             database.child(currentUserId!!).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val hoursList = MutableList(7) { 0 }  // Initialize list with 7 elements
-                    for ((index, projectSnapshot) in dataSnapshot.children.withIndex()) {
-                        val project = projectSnapshot.getValue(Project::class.java)
-                        if (project != null) {
-                            val timeStringMin = project.minimumDailyHours
-                            val timeStringMax = project.maximumDailyHours
-                            val partsMin = timeStringMin.split(":")
-                            val partsMax = timeStringMax.split(":")
-                            val minHours = partsMin[0].toInt()
-                            val maxHours = partsMax[0].toInt()
+                    // Check if hoursMap is empty before generating random hours
+                    if (hoursMap.isEmpty()) {
+                        for (projectSnapshot in dataSnapshot.children) {
+                            val project = projectSnapshot.getValue(Project::class.java)
+                            if (project != null) {
+                                val minHours = project.minimumDailyHours.toInt()
+                                val maxHours = project.maximumDailyHours.toInt()
 
-                            // Generate a random number of hours within the range of minHours and maxHours
-                            val randomHours = (minHours..maxHours).random()
-                            hoursList[index % 7] += randomHours  // Use modulus to avoid going out of bounds
+                                // Get or create the list associated with the current project's ID
+                                val hoursList =
+                                    hoursMap.getOrPut(projectSnapshot.key!!) { MutableList(7) { 0 } }
+
+                                // Generate a random number of hours within the range of minHours and maxHours for each day of the week
+                                for (i in 0 until 7) {
+                                    val randomHours = (minHours..maxHours).random()
+                                    hoursList[i] = randomHours
+                                }
+                            }
                         }
                     }
-                    ChartsActivity.ChartUtils.setupLineChart(anyChartView, hoursList)
+
+                    // Iterate over the hoursMap and setup the line chart for each project
+                    for ((projectId, hoursList) in hoursMap) {
+                        val anyChartView: AnyChartView = findViewById(R.id.any_chart_view)
+                        ChartsActivity.ChartUtils.setupLineChart(anyChartView, hoursList)
+                    }
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -102,7 +115,8 @@ class ProjectDetailActivity : AppCompatActivity() {
                     .load(uri)
                     .into(userPhoto)
             }.addOnFailureListener {
-                // Handle any errors
+                // Load default image from drawable when image download fails
+                userPhoto.setImageResource(R.drawable.person)
             }
 
         }

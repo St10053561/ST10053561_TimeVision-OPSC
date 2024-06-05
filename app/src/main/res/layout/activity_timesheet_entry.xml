@@ -12,7 +12,7 @@
         android:layout_marginTop="16dp"
         android:src="@drawable/ic_time_vision_logo_remove" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/browseFilesButton"
         android:layout_width="361dp"
         android:layout_height="90dp"

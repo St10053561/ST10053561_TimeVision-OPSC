@@ -49,6 +49,7 @@ class ProjectDetailActivity : AppCompatActivity() {
                 hours.text.toString() + "${project.minimumDailyHours} - ${project.maximumDailyHours}"
             projectDate.text = projectDate.text.toString() + project.date
 
+            // Assuming totalDuration is a comma-separated string of integers
             val anyChartView: AnyChartView = findViewById(R.id.any_chart_view)
             // Assuming totalDuration is a comma-separated string of integers
             val totalDurationList = if (project.totalDuration.isNotEmpty()) {

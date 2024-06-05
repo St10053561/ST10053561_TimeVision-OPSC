@@ -1,7 +1,9 @@
 package com.example.timevision_application
 
+import android.Manifest
 import android.app.AlertDialog
 import android.app.DatePickerDialog
+import android.app.ProgressDialog
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,8 +15,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
-import android.Manifest
-import android.app.ProgressDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -58,6 +58,7 @@ class TimesheetEntry : AppCompatActivity() {
 
         storageReference = FirebaseStorage.getInstance()
         auth = FirebaseAuth.getInstance()
+        databaseReference = FirebaseDatabase.getInstance().reference
 
         projectNameInput = findViewById(R.id.projectNameInput)
         dateInput = findViewById(R.id.dateInput)
@@ -84,10 +85,7 @@ class TimesheetEntry : AppCompatActivity() {
         }
 
         browseFilesButton.setOnClickListener {
-            val intent = Intent()
-            intent.type = "image/*"
-            intent.action = Intent.ACTION_GET_CONTENT
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), IMAGE_PICKER_REQUEST_CODE)
+            openImagePicker()
         }
 
         submitButton.setOnClickListener {
@@ -143,43 +141,6 @@ class TimesheetEntry : AppCompatActivity() {
         timePickerDialog.show()
     }
 
-    private fun saveToDatabase(projectName: String, date: String, category: String, startTime: String, endTime: String, minimumDailyHours: String, maximumDailyHours: String, totalDuration: String, workDescription: String, imageUri: Uri?) {
-        val uid = auth.currentUser?.uid
-        databaseReference = FirebaseDatabase.getInstance().getReference("TimeSheetEntries")
-
-        val entry = TimesheetEntryData(projectName, date, category, startTime, endTime, minimumDailyHours, maximumDailyHours, totalDuration, workDescription)
-
-        if (uid != null) {
-            databaseReference.child(uid).push().setValue(entry).addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    imageUri?.let {
-                        uploadImage(it) {
-                            browseFilesButton.setImageResource(R.drawable.ic_image_uploaded)
-                        }
-                    }
-                    Toast.makeText(this@TimesheetEntry, "Data Successfully Saved", Toast.LENGTH_SHORT).show()
-                    clearFields()
-                } else {
-                    Toast.makeText(this@TimesheetEntry, "Failed To Save Timesheet Entry", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    private fun clearFields() {
-        projectNameInput.text?.clear()
-        dateInput.text?.clear()
-        categoryInput.text?.clear()
-        startTimeInput.text?.clear()
-        endTimeInput.text?.clear()
-        minimumDailyHoursInput.text?.clear()
-        maximumDailyHoursInput.text?.clear()
-        totalDuration.text?.clear()
-        workDescriptionInput.text?.clear()
-        imageUri = null
-        browseFilesButton.setImageResource(R.drawable.ic_add_image)
-    }
-
     private fun openImagePicker() {
         AlertDialog.Builder(this)
             .setTitle("Select Action")
@@ -191,6 +152,7 @@ class TimesheetEntry : AppCompatActivity() {
             }
             .show()
     }
+
     private fun openCamera() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
@@ -201,11 +163,13 @@ class TimesheetEntry : AppCompatActivity() {
             }
         }
     }
+
     private fun openGallery() {
         val pickPhotoIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         pickPhotoIntent.type = "image/*"
         startActivityForResult(pickPhotoIntent, IMAGE_PICKER_REQUEST_CODE)
     }
+
     private fun uploadImage(imageUri: Uri, onSuccess: () -> Unit) {
         val progressDialog = ProgressDialog(this)
         progressDialog.setTitle("Uploading...")
@@ -241,16 +205,13 @@ class TimesheetEntry : AppCompatActivity() {
 
                 CAMERA_REQUEST_CODE -> {
                     val photo: Bitmap = data?.extras?.get("data") as Bitmap
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE)
-                    } else {
-                        imageUri = getImageUri(photo)
-                        browseFilesButton.setImageURI(imageUri) // Display captured image
-                    }
+                    imageUri = getImageUri(photo)
+                    browseFilesButton.setImageBitmap(photo) // Display captured image
                 }
             }
         }
     }
+
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -279,6 +240,57 @@ class TimesheetEntry : AppCompatActivity() {
         return Uri.parse(path)
     }
 
+    private fun saveToDatabase(
+        projectName: String,
+        date: String,
+        category: String,
+        startTime: String,
+        endTime: String,
+        minimumDailyHours: String,
+        maximumDailyHours: String,
+        totalDuration: String,
+        workDescription: String,
+        imageUri: Uri?
+    ) {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setTitle("Saving...")
+        progressDialog.show()
+
+        val timesheetEntryData = TimesheetEntryData(
+            projectName, date, category, startTime, endTime,
+            minimumDailyHours, maximumDailyHours, totalDuration, workDescription
+        )
+
+        val userId = auth.currentUser?.uid ?: return
+        val timesheetEntryRef = databaseReference.child("TimeSheetEntries").child(userId).push()
+
+        if (imageUri != null) {
+            uploadImage(imageUri) {
+                timesheetEntryData.imageUrl = imageUri.toString() // Save image URL to database
+                timesheetEntryRef.setValue(timesheetEntryData).addOnCompleteListener { task ->
+                    progressDialog.dismiss()
+                    if (task.isSuccessful) {
+                        Toast.makeText(this@TimesheetEntry, "Timesheet Entry Saved", Toast.LENGTH_SHORT).show()
+                        finish()
+                    } else {
+                        Toast.makeText(this@TimesheetEntry, "Failed to Save Timesheet Entry", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        } else {
+            timesheetEntryRef.setValue(timesheetEntryData).addOnCompleteListener { task ->
+                progressDialog.dismiss()
+                if (task.isSuccessful) {
+                    Toast.makeText(this@TimesheetEntry, "Timesheet Entry Saved", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Toast.makeText(this@TimesheetEntry, "Failed to Save Timesheet Entry", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+
     data class TimesheetEntryData(
         var projectName: String? = null,
         var date: String? = null,
@@ -288,6 +300,8 @@ class TimesheetEntry : AppCompatActivity() {
         var minimumDailyHours: String? = null,
         var maximumDailyHours: String? = null,
         var totalDuration: String? = null,
-        var workDescription: String? = null
+        var workDescription: String? = null,
+        var imageUrl: String? = null
     )
+
 }

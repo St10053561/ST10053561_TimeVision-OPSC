@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -38,6 +42,11 @@
         <activity android:name=".TimeTrackerReport" />
 
         <activity android:name=".AbsenceActivity"/>
+
+        <activity android:name=".Register"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name=".TimesheetEntry" />
 
         <!-- Declare the HomeScreen activity here -->
         <activity android:name=".HomeScreen" />

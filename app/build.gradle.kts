@@ -57,9 +57,9 @@ dependencies {
 
     implementation("com.google.firebase:firebase-analytics")
     //Firebase Libraries
-    implementation("com.google.firebase:firebase-auth:22.3.1")
-    implementation("com.google.firebase:firebase-database:20.3.1")
-    implementation("com.google.firebase:firebase-storage-ktx:19.2.2")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-storage-ktx")
     //Progress Dialog
     implementation("com.jpardogo.googleprogressbar:library:1.2.0")
 
@@ -75,3 +75,5 @@ dependencies {
     //Adding the link here for github
     implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
 }
+
+apply(plugin = "com.google.gms.google-services")

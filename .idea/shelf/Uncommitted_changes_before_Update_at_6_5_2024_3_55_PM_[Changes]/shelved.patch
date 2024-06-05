@@ -1,0 +1,750 @@
+Index: app/src/main/java/com/example/timevision_application/ChartsActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.timevision_application\r\n\r\n\r\nimport android.os.Bundle\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport com.anychart.AnyChart\r\nimport com.anychart.AnyChartView\r\nimport com.anychart.chart.common.dataentry.DataEntry\r\nimport com.anychart.chart.common.dataentry.ValueDataEntry\r\nimport com.anychart.charts.Cartesian\r\nimport com.anychart.core.cartesian.series.Line\r\nimport com.anychart.data.Mapping\r\nimport kotlin.random.Random\r\n\r\nclass ChartsActivity : AppCompatActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContentView(R.layout.activity_chart)\r\n\r\n\r\n    }\r\n\r\n    object ChartUtils {\r\n        // Function to set up the line chart\r\n        fun setupLineChart(anyChartView: AnyChartView, hoursList: List<Int>) {\r\n            // Create a line chart\r\n            val cartesian: Cartesian = AnyChart.line()\r\n\r\n            // Initialize a list to store the data entries for the chart\r\n            val data: MutableList<DataEntry> = ArrayList()\r\n            // List of days of the week\r\n            val daysOfWeek = listOf(\"Mon\", \"Tue\", \"Wed\", \"Thu\", \"Fri\", \"Sat\", \"Sun\")\r\n            // Loop through each day of the week\r\n            for ((index, day) in daysOfWeek.withIndex()) {\r\n                // Add a new data entry for each day with the hours from the hoursList\r\n                data.add(ValueDataEntry(day, hoursList[index]))\r\n            }\r\n\r\n            // Create a set of data and add the data entries to it\r\n            val set: com.anychart.data.Set = com.anychart.data.Set.instantiate()\r\n            set.data(data)\r\n\r\n            // Map the data for the line chart\r\n            val lineData: Mapping = set.mapAs(\"{ x: 'x', value: 'value' }\")\r\n            // Create a line series with the mapped data\r\n            val series: Line = cartesian.line(lineData)\r\n\r\n            // Set the stroke settings for the line\r\n            series.stroke(\"blue\", 2f, \"10 5\", \"round\", \"round\")\r\n\r\n            // Set the title of the chart\r\n            cartesian.title(\"Weekly Category Data\")\r\n\r\n            // Set the title of the x-axis and y-axis\r\n            cartesian.xAxis(0).title(\"Days\")\r\n            cartesian.yAxis(0).title(\"Hours\")\r\n\r\n            // Enable tooltips for the chart\r\n            cartesian.tooltip().enabled(true)\r\n\r\n            // Set the chart in the AnyChartView\r\n            anyChartView.setChart(cartesian)\r\n        }\r\n    }\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/ChartsActivity.kt b/app/src/main/java/com/example/timevision_application/ChartsActivity.kt
+--- a/app/src/main/java/com/example/timevision_application/ChartsActivity.kt	(revision 59e9e582254f2e2710d392c58a3e60a7fac156c1)
++++ b/app/src/main/java/com/example/timevision_application/ChartsActivity.kt	(date 1717593824809)
+@@ -1,6 +1,7 @@
+ package com.example.timevision_application
+ 
+ 
++import android.icu.text.SimpleDateFormat
+ import android.os.Bundle
+ import androidx.appcompat.app.AppCompatActivity
+ import com.anychart.AnyChart
+@@ -10,6 +11,7 @@
+ import com.anychart.charts.Cartesian
+ import com.anychart.core.cartesian.series.Line
+ import com.anychart.data.Mapping
++import java.util.Locale
+ import kotlin.random.Random
+ 
+ class ChartsActivity : AppCompatActivity() {
+@@ -22,7 +24,13 @@
+ 
+     object ChartUtils {
+         // Function to set up the line chart
+-        fun setupLineChart(anyChartView: AnyChartView, hoursList: List<Int>) {
++        fun setupLineChart(
++            anyChartView: AnyChartView,
++            hoursList: List<Int>,
++            minHours: Int,
++            maxHours: Int,
++            projectDate: String
++        ): Cartesian {
+             // Create a line chart
+             val cartesian: Cartesian = AnyChart.line()
+ 
+@@ -48,19 +56,78 @@
+             // Set the stroke settings for the line
+             series.stroke("blue", 2f, "10 5", "round", "round")
+ 
++            // Create data for min and max lines
++            val minLineData = daysOfWeek.map { ValueDataEntry(it, minHours) }
++            val maxLineData = daysOfWeek.map { ValueDataEntry(it, maxHours) }
++
++            // Add min and max lines to the chart
++            cartesian.line(minLineData).stroke("2 red")
++            cartesian.line(maxLineData).stroke("2 green")
++
++
++            // Parse the project date to get the month name
++            val inputFormat = SimpleDateFormat("d/M/yyyy", Locale.ENGLISH)
++            val outputFormat = SimpleDateFormat("MMMM", Locale.ENGLISH)
++            val date = inputFormat.parse(projectDate)
++            val monthName = outputFormat.format(date)
++
+             // Set the title of the chart
+-            cartesian.title("Weekly Category Data")
++            cartesian.title("$monthName Category Data")
+ 
+             // Set the title of the x-axis and y-axis
+             cartesian.xAxis(0).title("Days")
+             cartesian.yAxis(0).title("Hours")
+ 
++            // Set the y-axis scale to display only whole numbers
++            cartesian.yScale().ticks().interval(1)
++
+             // Enable tooltips for the chart
+             cartesian.tooltip().enabled(true)
+ 
+             // Set the chart in the AnyChartView
+             anyChartView.setChart(cartesian)
++            return cartesian
+         }
++
++        fun updateLineChartData(cartesian: Cartesian, hoursList: List<Int>, projectDate: String) {
++            // If hoursList contains less than 7 values, add default values for the missing days
++            val completeHoursList = if (hoursList.size < 7) {
++                hoursList + List(7 - hoursList.size) { 0 }
++            } else {
++                hoursList
++            }
++            // Initialize a list to store the data entries for the chart
++            val data: MutableList<DataEntry> = ArrayList()
++            // List of days of the week
++            val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
++            // Loop through each day of the week
++            for ((index, day) in daysOfWeek.withIndex()) {
++                // Add a new data entry for each day with the hours from the hoursList
++                data.add(ValueDataEntry(day, hoursList[index]))
++            }
++
++            // Create a set of data and add the data entries to it
++            val set: com.anychart.data.Set = com.anychart.data.Set.instantiate()
++            set.data(data)
++
++            // Map the data for the line chart
++            val lineData: Mapping = set.mapAs("{ x: 'x', value: 'value' }")
++            // Create a line series with the mapped data
++            val series: Line = cartesian.line(lineData)
++
++            // Set the stroke settings for the line
++            series.stroke("blue", 2f, "10 5", "round", "round")
++
++            // Parse the project date to get the month name
++            val inputFormat = SimpleDateFormat("d/M/yyyy", Locale.ENGLISH)
++            val outputFormat = SimpleDateFormat("MMMM", Locale.ENGLISH)
++            val date = inputFormat.parse(projectDate)
++            val monthName = outputFormat.format(date)
++
++            // Set the title of the chart
++            cartesian.title("$monthName Category Data")
++        }
++
+     }
+ 
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.timevision_application\r\n\r\nimport android.annotation.SuppressLint\r\nimport android.os.Bundle\r\nimport android.widget.Button\r\nimport android.widget.ImageView\r\nimport android.widget.TextView\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport com.anychart.AnyChart\r\nimport com.anychart.AnyChartView\r\nimport com.anychart.chart.common.dataentry.DataEntry\r\nimport com.anychart.chart.common.dataentry.ValueDataEntry\r\nimport com.anychart.charts.Cartesian\r\nimport com.anychart.core.cartesian.series.Line\r\nimport com.anychart.data.Mapping\r\nimport com.bumptech.glide.Glide\r\nimport com.google.firebase.auth.FirebaseAuth\r\nimport com.google.firebase.database.DataSnapshot\r\nimport com.google.firebase.database.DatabaseError\r\nimport com.google.firebase.database.FirebaseDatabase\r\nimport com.google.firebase.database.ValueEventListener\r\nimport com.google.firebase.ktx.Firebase\r\nimport com.google.firebase.storage.ktx.storage\r\n\r\nclass ProjectDetailActivity : AppCompatActivity() {\r\n    @SuppressLint(\"SetTextI18n\")\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContentView(R.layout.activity_project_detail)\r\n\r\n        val projectName: TextView = findViewById(R.id.projectName)\r\n        val projectCategory: TextView = findViewById(R.id.projectCategory)\r\n        val description: TextView = findViewById(R.id.description)\r\n        val hours: TextView = findViewById(R.id.hours)\r\n        val userPhoto: ImageView = findViewById(R.id.userPhoto)\r\n        val projectDate: TextView = findViewById(R.id.projectDate)\r\n\r\n        val project = intent.getSerializableExtra(\"project\") as? Project\r\n\r\n        if (project != null) {\r\n            projectName.text = project.projectName\r\n            projectCategory.text = projectCategory.text.toString() + project.category\r\n            description.text = description.text.toString() + \"\\n\" + project.workDescription\r\n            hours.text =\r\n                hours.text.toString() + \"${project.minimumDailyHours} - ${project.maximumDailyHours}\"\r\n            projectDate.text = projectDate.text.toString() + project.date\r\n\r\n            val anyChartView: AnyChartView = findViewById(R.id.any_chart_view)\r\n            // Assuming totalDuration is a comma-separated string of integers\r\n            val totalDurationList = if (project.totalDuration.isNotEmpty()) {\r\n                project.totalDuration.split(\",\").map { it.trim().toInt() }\r\n            } else {\r\n                emptyList()\r\n            }\r\n\r\n\r\n            // Get the current user ID\r\n            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid\r\n\r\n\r\n            val database = FirebaseDatabase.getInstance().getReference(\"TimeSheetEntries\")\r\n            database.child(currentUserId!!).addValueEventListener(object : ValueEventListener {\r\n                override fun onDataChange(dataSnapshot: DataSnapshot) {\r\n                    val hoursList = MutableList(7) { 0 }  // Initialize list with 7 elements\r\n                    for ((index, projectSnapshot) in dataSnapshot.children.withIndex()) {\r\n                        val project = projectSnapshot.getValue(Project::class.java)\r\n                        if (project != null) {\r\n                            val timeStringMin = project.minimumDailyHours\r\n                            val timeStringMax = project.maximumDailyHours\r\n                            val partsMin = timeStringMin.split(\":\")\r\n                            val partsMax = timeStringMax.split(\":\")\r\n                            val minHours = partsMin[0].toInt()\r\n                            val maxHours = partsMax[0].toInt()\r\n\r\n                            // Generate a random number of hours within the range of minHours and maxHours\r\n                            val randomHours = (minHours..maxHours).random()\r\n                            hoursList[index % 7] += randomHours  // Use modulus to avoid going out of bounds\r\n                        }\r\n                    }\r\n                    ChartsActivity.ChartUtils.setupLineChart(anyChartView, hoursList)\r\n                }\r\n\r\n                override fun onCancelled(databaseError: DatabaseError) {\r\n                    // Handle possible errors.\r\n                }\r\n            })\r\n\r\n            // Get a reference to the ImageView\r\n            val userPhoto: ImageView = findViewById(R.id.userPhoto)\r\n\r\n            // Get a reference to the Firebase Storage instance\r\n            val storage = Firebase.storage\r\n\r\n\r\n// Provide the path to the image within the bucket\r\n            val imageRef =\r\n                storage.reference.child(\"images/OoLYzP9VPTa97vuUzOW3wijgjFv1/83c34f93-db6b-4d5d-a4ae-6fb250893ac1\")\r\n\r\n            imageRef.downloadUrl.addOnSuccessListener { uri ->\r\n                // Use Glide to load the image into the ImageView\r\n                Glide.with(this /* context */)\r\n                    .load(uri)\r\n                    .into(userPhoto)\r\n            }.addOnFailureListener {\r\n                // Handle any errors\r\n            }\r\n\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt b/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt
+--- a/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt	(revision 59e9e582254f2e2710d392c58a3e60a7fac156c1)
++++ b/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt	(date 1717594494783)
+@@ -6,13 +6,8 @@
+ import android.widget.ImageView
+ import android.widget.TextView
+ import androidx.appcompat.app.AppCompatActivity
+-import com.anychart.AnyChart
+ import com.anychart.AnyChartView
+-import com.anychart.chart.common.dataentry.DataEntry
+-import com.anychart.chart.common.dataentry.ValueDataEntry
+ import com.anychart.charts.Cartesian
+-import com.anychart.core.cartesian.series.Line
+-import com.anychart.data.Mapping
+ import com.bumptech.glide.Glide
+ import com.google.firebase.auth.FirebaseAuth
+ import com.google.firebase.database.DataSnapshot
+@@ -21,8 +16,16 @@
+ import com.google.firebase.database.ValueEventListener
+ import com.google.firebase.ktx.Firebase
+ import com.google.firebase.storage.ktx.storage
++import java.text.SimpleDateFormat
++import java.util.Calendar
++import java.util.Locale
+ 
+ class ProjectDetailActivity : AppCompatActivity() {
++
++    // Declare hoursMap as a member variable
++    private val hoursMap = HashMap<String, MutableList<Int>>()
++    private lateinit var calendar: Calendar
++
+     @SuppressLint("SetTextI18n")
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+@@ -57,27 +60,84 @@
+             // Get the current user ID
+             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+ 
+-
+             val database = FirebaseDatabase.getInstance().getReference("TimeSheetEntries")
++
+             database.child(currentUserId!!).addValueEventListener(object : ValueEventListener {
+                 override fun onDataChange(dataSnapshot: DataSnapshot) {
+-                    val hoursList = MutableList(7) { 0 }  // Initialize list with 7 elements
+-                    for ((index, projectSnapshot) in dataSnapshot.children.withIndex()) {
+-                        val project = projectSnapshot.getValue(Project::class.java)
+-                        if (project != null) {
+-                            val timeStringMin = project.minimumDailyHours
+-                            val timeStringMax = project.maximumDailyHours
+-                            val partsMin = timeStringMin.split(":")
+-                            val partsMax = timeStringMax.split(":")
+-                            val minHours = partsMin[0].toInt()
+-                            val maxHours = partsMax[0].toInt()
++                    // Check if hoursMap is empty before generating random hours
++                    if (hoursMap.isEmpty()) {
++                        for (projectSnapshot in dataSnapshot.children) {
++                            val project = projectSnapshot.getValue(Project::class.java)
++                            if (project != null) {
++                                val minHours = project.minimumDailyHours.toInt()
++                                val maxHours = project.maximumDailyHours.toInt()
+ 
+-                            // Generate a random number of hours within the range of minHours and maxHours
+-                            val randomHours = (minHours..maxHours).random()
+-                            hoursList[index % 7] += randomHours  // Use modulus to avoid going out of bounds
++                                // Get or create the list associated with the current project's ID
++                                val hoursList =
++                                    hoursMap.getOrPut(projectSnapshot.key!!) { MutableList(7) { 0 } }
++
++                                // Generate a random number of hours within the range of minHours and maxHours for each day of the week
++                                for (i in 0 until 7) {
++                                    val randomHours = (minHours..maxHours).random()
++                                    hoursList[i] = randomHours
++                                }
++
++                                // Parse the project date to a Calendar instance
++                                val dateFormat = SimpleDateFormat("d/M/yyyy", Locale.ENGLISH)
++                                val date = dateFormat.parse(project.date)
++                                calendar = Calendar.getInstance()
++                                calendar.time = date
++
++
++                                // Store the returned Cartesian object in a variable
++                                val cartesian = ChartsActivity.ChartUtils.setupLineChart(
++                                    anyChartView,
++                                    hoursList,
++                                    minHours,
++                                    maxHours,
++                                    project.date
++                                )
++
++                                val previousMonthButton: Button = findViewById(R.id.PreviousMonth)
++                                previousMonthButton.setOnClickListener {
++                                    // Decrement the month
++                                    calendar.add(Calendar.MONTH, -1)
++
++                                    // Update the chart title
++                                    val outputFormat = SimpleDateFormat("MMMM", Locale.ENGLISH)
++                                    val monthName = outputFormat.format(calendar.time)
++                                    cartesian.title("$monthName Category Data")
++
++                                    // Fetch and update the chart data for the previous month
++                                    updateChartData(cartesian,project.date, hoursList)
++                                }
++
++
++
++
++
++                            }
+                         }
+                     }
+-                    ChartsActivity.ChartUtils.setupLineChart(anyChartView, hoursList)
++
++                    // Iterate over the hoursMap and setup the line chart for each project
++                    for ((projectId, hoursList) in hoursMap) {
++                        val anyChartView: AnyChartView = findViewById(R.id.any_chart_view)
++                        val project = intent.getSerializableExtra("project") as? Project
++                        if (project != null) {
++                            val minHours = project.minimumDailyHours.toInt()
++                            val maxHours = project.maximumDailyHours.toInt()
++                            ChartsActivity.ChartUtils.setupLineChart(
++                                anyChartView,
++                                hoursList,
++                                minHours,
++                                maxHours,
++                                project.date
++                            )
++                        }
++                    }
++
++
+                 }
+ 
+                 override fun onCancelled(databaseError: DatabaseError) {
+@@ -102,9 +162,28 @@
+                     .load(uri)
+                     .into(userPhoto)
+             }.addOnFailureListener {
+-                // Handle any errors
++                // Load default image from drawable when image download fails
++                userPhoto.setImageResource(R.drawable.person)
+             }
++
++        }
++    }
+ 
+-        }
++
++    private fun updateChartData(
++        cartesian: Cartesian,
++        projectDate: String,
++        hoursList: MutableList<Int>
++    ) {
++        // Fetch the data for the previous month
++//        val hoursList = fetchHoursForPreviousMonth()
++
++        // Update the chart data
++        ChartsActivity.ChartUtils.updateLineChartData(cartesian, hoursList, projectDate)
++    }
++
++    private fun fetchHoursForPreviousMonth(): List<Int> {
++        // Replace this with your actual code to fetch the hours for the previous month
++        return emptyList()
+     }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/timevision_application/TimeSheetEntry.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.timevision_application\r\n\r\n\r\nimport android.app.AlertDialog\r\nimport android.app.DatePickerDialog\r\nimport android.app.TimePickerDialog\r\nimport android.content.Intent\r\nimport android.content.pm.PackageManager\r\nimport android.graphics.Bitmap\r\nimport android.net.Uri\r\nimport android.os.Bundle\r\nimport android.provider.MediaStore\r\nimport android.widget.Button\r\nimport android.widget.EditText\r\nimport android.widget.ImageButton\r\nimport android.widget.Toast\r\nimport android.Manifest\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport androidx.core.app.ActivityCompat\r\nimport androidx.core.content.ContextCompat\r\nimport com.google.android.material.textfield.TextInputEditText\r\nimport com.google.android.material.snackbar.Snackbar\r\nimport com.google.firebase.auth.FirebaseAuth\r\nimport com.google.firebase.database.DatabaseReference\r\nimport com.google.firebase.database.FirebaseDatabase\r\nimport com.google.firebase.storage.FirebaseStorage\r\nimport com.google.firebase.storage.StorageReference\r\nimport java.io.ByteArrayOutputStream\r\nimport java.util.*\r\n\r\nclass TimesheetEntry : AppCompatActivity() {\r\n\r\n    // Companion object for constants\r\n    companion object {\r\n        private const val IMAGE_PICKER_REQUEST_CODE = 100\r\n        private const val CAMERA_REQUEST_CODE = 101\r\n        private const val CAMERA_PERMISSION_REQUEST_CODE = 102\r\n        private const val WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 103\r\n    }\r\n\r\n    // Global Variables\r\n    private lateinit var browseFilesButton: ImageButton\r\n    private lateinit var projectNameInput: TextInputEditText\r\n    private lateinit var dateInput: TextInputEditText\r\n    private lateinit var categoryInput: TextInputEditText\r\n    private lateinit var startTimeInput: TextInputEditText\r\n    private lateinit var endTimeInput: TextInputEditText\r\n    private lateinit var minimumDailyHoursInput: EditText\r\n    private lateinit var maximumDailyHoursInput: EditText\r\n    private lateinit var totalDuration: TextInputEditText\r\n    private lateinit var workDescriptionInput: TextInputEditText\r\n    private lateinit var submitButton: Button\r\n\r\n    // Variables for database\r\n    private lateinit var auth: FirebaseAuth\r\n    private lateinit var databaseReference: DatabaseReference\r\n\r\n    // Storage Reference\r\n    private lateinit var storageReference: StorageReference\r\n    private var imageUri: Uri? = null\r\n\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContentView(R.layout.activity_timesheet_entry)\r\n\r\n        // Initialize FirebaseAuth instance\r\n        auth = FirebaseAuth.getInstance()\r\n\r\n        // Initialize TextInputEditText fields\r\n        projectNameInput = findViewById(R.id.projectNameInput)\r\n        dateInput = findViewById(R.id.dateInput)\r\n        categoryInput = findViewById(R.id.categoryInput)\r\n        startTimeInput = findViewById(R.id.startTimeInput)\r\n        endTimeInput = findViewById(R.id.endTimeInput)\r\n        minimumDailyHoursInput = findViewById(R.id.minimumDailyHoursInput)\r\n        maximumDailyHoursInput = findViewById(R.id.maximumDailyHoursInput)\r\n        workDescriptionInput = findViewById(R.id.workDescriptionInput)\r\n        totalDuration = findViewById(R.id.totalDuration)\r\n        submitButton = findViewById(R.id.submitButton)\r\n        browseFilesButton = findViewById(R.id.browseFilesButton)\r\n\r\n\r\n        // Set OnFocusChangeListener for the TextInputEditText fields\r\n        dateInput.setOnFocusChangeListener { _, hasFocus ->\r\n            if (hasFocus) {\r\n                showDatePicker(dateInput)\r\n            }\r\n        }\r\n\r\n        startTimeInput.setOnFocusChangeListener { _, hasFocus ->\r\n            if (hasFocus) {\r\n                showTimePicker(startTimeInput)\r\n            }\r\n        }\r\n\r\n        endTimeInput.setOnFocusChangeListener { _, hasFocus ->\r\n            if (hasFocus) {\r\n                showTimePicker(endTimeInput)\r\n            }\r\n        }\r\n\r\n        minimumDailyHoursInput.setOnFocusChangeListener { _, hasFocus ->\r\n            if (hasFocus) {\r\n                showTimePicker(minimumDailyHoursInput)\r\n            }\r\n        }\r\n\r\n        maximumDailyHoursInput.setOnFocusChangeListener { _, hasFocus ->\r\n            if (hasFocus) {\r\n                showTimePicker(maximumDailyHoursInput)\r\n            }\r\n        }\r\n\r\n        browseFilesButton.setOnClickListener {\r\n            // Add your browse files functionality here\r\n            openImagePicker()\r\n        }\r\n\r\n        // Set OnClickListener for the submit button\r\n        submitButton.setOnClickListener {\r\n            /// Get the text entered by the user\r\n            val projectName = projectNameInput.text.toString()\r\n            val date = dateInput.text.toString()\r\n            val category = categoryInput.text.toString()\r\n            val workDescription = workDescriptionInput.text.toString()\r\n            val startTime = startTimeInput.text.toString()\r\n            val endTime = endTimeInput.text.toString()\r\n            val minimumDailyHours = minimumDailyHoursInput.text.toString()\r\n            val maximumDailyHours = maximumDailyHoursInput.text.toString()\r\n            val totalDuration = totalDuration.text.toString()\r\n\r\n            // Check if any of the fields are empty\r\n            when {\r\n                projectName.isEmpty() -> Toast.makeText(this, \"Please fill in the Project Name\", Toast.LENGTH_SHORT).show()\r\n                startTime.isEmpty() -> Toast.makeText(this, \"Please Pick The Start Time\", Toast.LENGTH_SHORT).show()\r\n                category.isEmpty() -> Toast.makeText(this, \"Please fill in the Category\", Toast.LENGTH_SHORT).show()\r\n                startTime.isEmpty() -> Toast.makeText(this, \"Please Pick The Start Time\", Toast.LENGTH_SHORT).show()\r\n                endTime.isEmpty() -> Toast.makeText(this, \"Please Pick The End Time\", Toast.LENGTH_SHORT).show()\r\n                minimumDailyHours.isEmpty() -> Toast.makeText(this, \"Please Pick the Minimum Daily Hours\", Toast.LENGTH_SHORT).show()\r\n                maximumDailyHours.isEmpty() -> Toast.makeText(this, \"Please Pick the Maximum Daily Hours\", Toast.LENGTH_SHORT).show()\r\n                totalDuration.isEmpty() -> Toast.makeText(this, \"Please fill in the Total Duration\", Toast.LENGTH_SHORT).show()\r\n                workDescription.isEmpty() -> Toast.makeText(this, \"Please fill in the Work Description\", Toast.LENGTH_SHORT).show()\r\n                else -> saveToDatabase(projectName, date, category, startTime, endTime, minimumDailyHours, maximumDailyHours, totalDuration, workDescription, imageUri)\r\n            }\r\n        }\r\n    }\r\n\r\n    private fun showDatePicker(textInputEditText: TextInputEditText) {\r\n        val calendar = Calendar.getInstance()\r\n        val year = calendar.get(Calendar.YEAR)\r\n        val month = calendar.get(Calendar.MONTH)\r\n        val day = calendar.get(Calendar.DAY_OF_MONTH)\r\n\r\n        val datePickerDialog = DatePickerDialog(\r\n            this,\r\n            DatePickerDialog.OnDateSetListener { _, selectedYear, selectedMonth, selectedDay ->\r\n                val selectedDate = \"${selectedMonth + 1}/$selectedDay/$selectedYear\"\r\n                textInputEditText.setText(selectedDate)\r\n            },\r\n            year,\r\n            month,\r\n            day\r\n        )\r\n\r\n        datePickerDialog.show()\r\n    }\r\n\r\n    private fun showTimePicker(editText: EditText) {\r\n        val calendar = Calendar.getInstance()\r\n        val hour = calendar.get(Calendar.HOUR_OF_DAY)\r\n        val minute = calendar.get(Calendar.MINUTE)\r\n\r\n        val timePickerDialog = TimePickerDialog(\r\n            this,\r\n            TimePickerDialog.OnTimeSetListener { _, selectedHour, selectedMinute ->\r\n                val selectedTime = String.format(\"%02d:%02d\", selectedHour, selectedMinute)\r\n                editText.setText(selectedTime)\r\n            },\r\n            hour,\r\n            minute,\r\n            true\r\n        )\r\n\r\n        timePickerDialog.show()\r\n    }\r\n\r\n    // Function to save data to the database\r\n    private fun saveToDatabase(\r\n        projectName: String,\r\n        date: String,\r\n        category: String,\r\n        startTime: String,\r\n        endTime: String,\r\n        minimumDailyHours: String,\r\n        maximumDailyHours: String,\r\n        totalDuration: String,\r\n        workDescription: String,\r\n        // Pass the image URI as a parameter\r\n        imageUri: Uri?\r\n    ) {\r\n        // Code to save entry to a database\r\n        val uid = auth.currentUser?.uid\r\n        databaseReference = FirebaseDatabase.getInstance().getReference(\"TimeSheetEntries\")\r\n\r\n        // Construct a TimesheetEntry object\r\n        val entry = TimesheetEntryData(\r\n            projectName,\r\n            date,\r\n            category,\r\n            startTime,\r\n            endTime,\r\n            minimumDailyHours,\r\n            maximumDailyHours,\r\n            totalDuration,\r\n            workDescription\r\n\r\n        )\r\n\r\n        if (uid != null) {\r\n            databaseReference.child(uid).push().setValue(entry).addOnCompleteListener { task ->\r\n                if (task.isSuccessful) {\r\n                    // If data saving is successful, upload the image\r\n                    imageUri?.let { uploadImage(it) {\r\n                        // Update browseFilesButton after successful upload\r\n                        browseFilesButton.setImageResource(R.drawable.ic_image_uploaded)\r\n                    } }\r\n                    Toast.makeText(this@TimesheetEntry, \"Data Successfully Saved\", Toast.LENGTH_SHORT).show()\r\n                    // Clear input fields\r\n                    clearFields()\r\n                } else {\r\n                    Toast.makeText(this@TimesheetEntry, \"Failed To Save Timesheet Entry\", Toast.LENGTH_SHORT).show()\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    // Function to clear all input fields\r\n    private fun clearFields() {\r\n        projectNameInput.text?.clear()\r\n        dateInput.text?.clear()\r\n        categoryInput.text?.clear()\r\n        startTimeInput.text?.clear()\r\n        endTimeInput.text?.clear()\r\n        minimumDailyHoursInput.text?.clear()\r\n        maximumDailyHoursInput.text?.clear()\r\n        totalDuration.text?.clear()\r\n        workDescriptionInput.text?.clear()\r\n        // Clear the image URI as well\r\n        imageUri = null\r\n    }\r\n    private fun openImagePicker() {\r\n        AlertDialog.Builder(this)\r\n            .setTitle(\"Select Action\")\r\n            .setItems(arrayOf(\"Take Photo\", \"Choose from Gallery\")) { _, which ->\r\n                when (which) {\r\n                    0 -> openCamera() // Take Photo\r\n                    1 -> openGallery() // Choose from Gallery\r\n                }\r\n            }\r\n            .show()\r\n    }\r\n\r\n    private fun openCamera() {\r\n        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {\r\n            // Permission is not granted, request it\r\n            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)\r\n        } else {\r\n            // Permission is granted, open the camera\r\n            val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)\r\n            if (takePictureIntent.resolveActivity(packageManager) != null) {\r\n                startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE)\r\n            }\r\n        }\r\n    }\r\n\r\n    private fun openGallery() {\r\n        val pickPhotoIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)\r\n        startActivityForResult(pickPhotoIntent, IMAGE_PICKER_REQUEST_CODE)\r\n    }\r\n\r\n    private fun uploadImage(imageUri: Uri, onSuccess: () -> Unit) {\r\n        // Storage reference to the root path where images will be stored\r\n        val storageReference = FirebaseStorage.getInstance().reference\r\n        // Create a reference to the location where the image will be stored\r\n        val imageRef =\r\n            storageReference.child(\"images/${auth.currentUser?.uid}/${UUID.randomUUID()}\")\r\n\r\n        // Upload the image to Firebase Storage\r\n        imageRef.putFile(imageUri)\r\n            .addOnSuccessListener {\r\n                onSuccess()\r\n                Toast.makeText(this@TimesheetEntry, \"Image Successfully Uploaded\", Toast.LENGTH_SHORT).show()\r\n            }\r\n            .addOnFailureListener {\r\n                Toast.makeText(this@TimesheetEntry, \"Failed To Upload Image\", Toast.LENGTH_SHORT).show()\r\n            }\r\n    }\r\n\r\n    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {\r\n        super.onActivityResult(requestCode, resultCode, data)\r\n        if (resultCode == RESULT_OK) {\r\n            when (requestCode) {\r\n                IMAGE_PICKER_REQUEST_CODE -> {\r\n                    // Handle the selected image URI here\r\n                    val selectedImageUri: Uri? = data?.data\r\n                    if (selectedImageUri != null) {\r\n                        // Save the selected image URI\r\n                        imageUri = selectedImageUri\r\n                    }\r\n                }\r\n                CAMERA_REQUEST_CODE -> {\r\n                    val photo: Bitmap = data?.extras?.get(\"data\") as Bitmap\r\n                    // Check for WRITE_EXTERNAL_STORAGE permission before converting bitmap to Uri\r\n                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {\r\n                        // Permission is not granted, request it\r\n                        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE)\r\n                    } else {\r\n                        // Permission is granted, proceed with getting the image URI\r\n                        imageUri = getImageUri(photo)\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {\r\n        super.onRequestPermissionsResult(requestCode, permissions, grantResults)\r\n        when (requestCode) {\r\n            CAMERA_PERMISSION_REQUEST_CODE -> {\r\n                // existing code...\r\n            }\r\n            WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE -> {\r\n                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {\r\n                    // Permission was granted, you can now write to external storage\r\n                } else {\r\n                    // Permission was denied. You can show a message to the user explaining why the permission is necessary.\r\n                    Toast.makeText(this, \"Storage permission is required to save images\", Toast.LENGTH_SHORT).show()\r\n                }\r\n                return\r\n            }\r\n            // Handle other permission results\r\n        }\r\n    }\r\n\r\n    private fun getImageUri(inImage: Bitmap): Uri {\r\n        val bytes = ByteArrayOutputStream()\r\n        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)\r\n        val path = MediaStore.Images.Media.insertImage(contentResolver, inImage, \"Title\", null)\r\n        return Uri.parse(path)\r\n    }\r\n\r\n    data class TimesheetEntryData(\r\n        var projectName: String? = null,\r\n        var date: String? = null,\r\n        var category: String? = null,\r\n        var startTime: String? = null,\r\n        var endTime: String? = null,\r\n        var minimumDailyHours: String? = null,\r\n        var maximumDailyHours: String? = null,\r\n        var totalDuration: String? = null,\r\n        var workDescription: String? = null,\r\n\r\n        )\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/TimeSheetEntry.kt b/app/src/main/java/com/example/timevision_application/TimeSheetEntry.kt
+--- a/app/src/main/java/com/example/timevision_application/TimeSheetEntry.kt	(revision 59e9e582254f2e2710d392c58a3e60a7fac156c1)
++++ b/app/src/main/java/com/example/timevision_application/TimeSheetEntry.kt	(date 1717441837827)
+@@ -15,6 +15,7 @@
+ import android.widget.ImageButton
+ import android.widget.Toast
+ import android.Manifest
++import android.app.ProgressDialog
+ import androidx.appcompat.app.AppCompatActivity
+ import androidx.core.app.ActivityCompat
+ import androidx.core.content.ContextCompat
+@@ -63,6 +64,11 @@
+         super.onCreate(savedInstanceState)
+         setContentView(R.layout.activity_timesheet_entry)
+ 
++        // Initialize FirebaseStorage instance
++        val storage = FirebaseStorage.getInstance()
++// Get a reference to the root of your Firebase Storage
++        val storageReference = storage.reference
++
+         // Initialize FirebaseAuth instance
+         auth = FirebaseAuth.getInstance()
+ 
+@@ -99,21 +105,14 @@
+             }
+         }
+ 
+-        minimumDailyHoursInput.setOnFocusChangeListener { _, hasFocus ->
+-            if (hasFocus) {
+-                showTimePicker(minimumDailyHoursInput)
+-            }
+-        }
+-
+-        maximumDailyHoursInput.setOnFocusChangeListener { _, hasFocus ->
+-            if (hasFocus) {
+-                showTimePicker(maximumDailyHoursInput)
+-            }
+-        }
+-
+         browseFilesButton.setOnClickListener {
+-            // Add your browse files functionality here
+-            openImagePicker()
++            val intent = Intent()
++            intent.type = "image/*"
++            intent.action = Intent.ACTION_GET_CONTENT
++            startActivityForResult(
++                Intent.createChooser(intent, "Select Picture"),
++                IMAGE_PICKER_REQUEST_CODE
++            )
+         }
+ 
+         // Set OnClickListener for the submit button
+@@ -131,16 +130,72 @@
+ 
+             // Check if any of the fields are empty
+             when {
+-                projectName.isEmpty() -> Toast.makeText(this, "Please fill in the Project Name", Toast.LENGTH_SHORT).show()
+-                startTime.isEmpty() -> Toast.makeText(this, "Please Pick The Start Time", Toast.LENGTH_SHORT).show()
+-                category.isEmpty() -> Toast.makeText(this, "Please fill in the Category", Toast.LENGTH_SHORT).show()
+-                startTime.isEmpty() -> Toast.makeText(this, "Please Pick The Start Time", Toast.LENGTH_SHORT).show()
+-                endTime.isEmpty() -> Toast.makeText(this, "Please Pick The End Time", Toast.LENGTH_SHORT).show()
+-                minimumDailyHours.isEmpty() -> Toast.makeText(this, "Please Pick the Minimum Daily Hours", Toast.LENGTH_SHORT).show()
+-                maximumDailyHours.isEmpty() -> Toast.makeText(this, "Please Pick the Maximum Daily Hours", Toast.LENGTH_SHORT).show()
+-                totalDuration.isEmpty() -> Toast.makeText(this, "Please fill in the Total Duration", Toast.LENGTH_SHORT).show()
+-                workDescription.isEmpty() -> Toast.makeText(this, "Please fill in the Work Description", Toast.LENGTH_SHORT).show()
+-                else -> saveToDatabase(projectName, date, category, startTime, endTime, minimumDailyHours, maximumDailyHours, totalDuration, workDescription, imageUri)
++                projectName.isEmpty() -> Toast.makeText(
++                    this,
++                    "Please fill in the Project Name",
++                    Toast.LENGTH_SHORT
++                ).show()
++
++                startTime.isEmpty() -> Toast.makeText(
++                    this,
++                    "Please Pick The Start Time",
++                    Toast.LENGTH_SHORT
++                ).show()
++
++                category.isEmpty() -> Toast.makeText(
++                    this,
++                    "Please fill in the Category",
++                    Toast.LENGTH_SHORT
++                ).show()
++
++                startTime.isEmpty() -> Toast.makeText(
++                    this,
++                    "Please Pick The Start Time",
++                    Toast.LENGTH_SHORT
++                ).show()
++
++                endTime.isEmpty() -> Toast.makeText(
++                    this,
++                    "Please Pick The End Time",
++                    Toast.LENGTH_SHORT
++                ).show()
++
++                minimumDailyHours.isEmpty() -> Toast.makeText(
++                    this,
++                    "Please Pick the Minimum Daily Hours",
++                    Toast.LENGTH_SHORT
++                ).show()
++
++                maximumDailyHours.isEmpty() -> Toast.makeText(
++                    this,
++                    "Please Pick the Maximum Daily Hours",
++                    Toast.LENGTH_SHORT
++                ).show()
++
++                totalDuration.isEmpty() -> Toast.makeText(
++                    this,
++                    "Please fill in the Total Duration",
++                    Toast.LENGTH_SHORT
++                ).show()
++
++                workDescription.isEmpty() -> Toast.makeText(
++                    this,
++                    "Please fill in the Work Description",
++                    Toast.LENGTH_SHORT
++                ).show()
++
++                else -> saveToDatabase(
++                    projectName,
++                    date,
++                    category,
++                    startTime,
++                    endTime,
++                    minimumDailyHours,
++                    maximumDailyHours,
++                    totalDuration,
++                    workDescription,
++                    imageUri
++                )
+             }
+         }
+     }
+@@ -220,15 +275,25 @@
+             databaseReference.child(uid).push().setValue(entry).addOnCompleteListener { task ->
+                 if (task.isSuccessful) {
+                     // If data saving is successful, upload the image
+-                    imageUri?.let { uploadImage(it) {
+-                        // Update browseFilesButton after successful upload
+-                        browseFilesButton.setImageResource(R.drawable.ic_image_uploaded)
+-                    } }
+-                    Toast.makeText(this@TimesheetEntry, "Data Successfully Saved", Toast.LENGTH_SHORT).show()
++                    imageUri?.let {
++                        uploadImage(it) {
++                            // Update browseFilesButton after successful upload
++                            browseFilesButton.setImageResource(R.drawable.ic_image_uploaded)
++                        }
++                    }
++                    Toast.makeText(
++                        this@TimesheetEntry,
++                        "Data Successfully Saved",
++                        Toast.LENGTH_SHORT
++                    ).show()
+                     // Clear input fields
+                     clearFields()
+                 } else {
+-                    Toast.makeText(this@TimesheetEntry, "Failed To Save Timesheet Entry", Toast.LENGTH_SHORT).show()
++                    Toast.makeText(
++                        this@TimesheetEntry,
++                        "Failed To Save Timesheet Entry",
++                        Toast.LENGTH_SHORT
++                    ).show()
+                 }
+             }
+         }
+@@ -248,6 +313,7 @@
+         // Clear the image URI as well
+         imageUri = null
+     }
++
+     private fun openImagePicker() {
+         AlertDialog.Builder(this)
+             .setTitle("Select Action")
+@@ -261,9 +327,17 @@
+     }
+ 
+     private fun openCamera() {
+-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
++        if (ContextCompat.checkSelfPermission(
++                this,
++                Manifest.permission.CAMERA
++            ) != PackageManager.PERMISSION_GRANTED
++        ) {
+             // Permission is not granted, request it
+-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
++            ActivityCompat.requestPermissions(
++                this,
++                arrayOf(Manifest.permission.CAMERA),
++                CAMERA_PERMISSION_REQUEST_CODE
++            )
+         } else {
+             // Permission is granted, open the camera
+             val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+@@ -274,11 +348,18 @@
+     }
+ 
+     private fun openGallery() {
+-        val pickPhotoIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
++        val pickPhotoIntent =
++            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
++        pickPhotoIntent.type = "image/*"
+         startActivityForResult(pickPhotoIntent, IMAGE_PICKER_REQUEST_CODE)
+     }
+ 
+     private fun uploadImage(imageUri: Uri, onSuccess: () -> Unit) {
++        // Create and show a ProgressDialog
++        val progressDialog = ProgressDialog(this)
++        progressDialog.setTitle("Uploading...")
++        progressDialog.show()
++
+         // Storage reference to the root path where images will be stored
+         val storageReference = FirebaseStorage.getInstance().reference
+         // Create a reference to the location where the image will be stored
+@@ -286,14 +367,23 @@
+             storageReference.child("images/${auth.currentUser?.uid}/${UUID.randomUUID()}")
+ 
+         // Upload the image to Firebase Storage
+-        imageRef.putFile(imageUri)
+-            .addOnSuccessListener {
+-                onSuccess()
+-                Toast.makeText(this@TimesheetEntry, "Image Successfully Uploaded", Toast.LENGTH_SHORT).show()
+-            }
+-            .addOnFailureListener {
+-                Toast.makeText(this@TimesheetEntry, "Failed To Upload Image", Toast.LENGTH_SHORT).show()
+-            }
++        val uploadTask = imageRef.putFile(imageUri)
++        uploadTask.addOnSuccessListener {
++            progressDialog.dismiss()
++            onSuccess()
++            Toast.makeText(
++                this@TimesheetEntry,
++                "Image Successfully Uploaded",
++                Toast.LENGTH_SHORT
++            ).show()
++        }.addOnFailureListener {
++            progressDialog.dismiss()
++            Toast.makeText(this@TimesheetEntry, "Failed To Upload Image", Toast.LENGTH_SHORT)
++                .show()
++        }.addOnProgressListener { taskSnapshot ->
++            val progress = 100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount
++            progressDialog.setMessage("Uploaded ${progress.toInt()}%")
++        }
+     }
+ 
+     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+@@ -308,12 +398,21 @@
+                         imageUri = selectedImageUri
+                     }
+                 }
++
+                 CAMERA_REQUEST_CODE -> {
+                     val photo: Bitmap = data?.extras?.get("data") as Bitmap
+                     // Check for WRITE_EXTERNAL_STORAGE permission before converting bitmap to Uri
+-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
++                    if (ContextCompat.checkSelfPermission(
++                            this,
++                            Manifest.permission.WRITE_EXTERNAL_STORAGE
++                        ) != PackageManager.PERMISSION_GRANTED
++                    ) {
+                         // Permission is not granted, request it
+-                        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE)
++                        ActivityCompat.requestPermissions(
++                            this,
++                            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
++                            WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE
++                        )
+                     } else {
+                         // Permission is granted, proceed with getting the image URI
+                         imageUri = getImageUri(photo)
+@@ -322,18 +421,28 @@
+             }
+         }
+     }
+-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
++
++    override fun onRequestPermissionsResult(
++        requestCode: Int,
++        permissions: Array<String>,
++        grantResults: IntArray
++    ) {
+         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+         when (requestCode) {
+             CAMERA_PERMISSION_REQUEST_CODE -> {
+                 // existing code...
+             }
++
+             WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE -> {
+                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                     // Permission was granted, you can now write to external storage
+                 } else {
+                     // Permission was denied. You can show a message to the user explaining why the permission is necessary.
+-                    Toast.makeText(this, "Storage permission is required to save images", Toast.LENGTH_SHORT).show()
++                    Toast.makeText(
++                        this,
++                        "Storage permission is required to save images",
++                        Toast.LENGTH_SHORT
++                    ).show()
+                 }
+                 return
+             }
+Index: app/src/main/res/drawable/card_background.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/drawable/card_background.xml b/app/src/main/res/drawable/card_background.xml
+new file mode 100644
+--- /dev/null	(date 1717340544441)
++++ b/app/src/main/res/drawable/card_background.xml	(date 1717340544441)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<shape xmlns:android="http://schemas.android.com/apk/res/android">
++    <solid android:color="#FFFFFF"/>
++    <corners android:radius="16dp"/>
++    <elevation android:shadowColor="#000000" android:shadowRadius="10.0" android:shadowDx="0" android:shadowDy="2"/>
++</shape>
+\ No newline at end of file
+Index: app/build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    alias(libs.plugins.androidApplication)\r\n    alias(libs.plugins.jetbrainsKotlinAndroid)\r\n    id(\"com.google.gms.google-services\")\r\n}\r\n\r\nandroid {\r\n    namespace = \"com.example.timevision_application\"\r\n    compileSdk = 34\r\n    viewBinding{\r\n        enable = true\r\n    }\r\n\r\n    defaultConfig {\r\n        applicationId = \"com.example.timevision_application\"\r\n        minSdk = 26\r\n        targetSdk = 34\r\n        versionCode = 1\r\n        versionName = \"1.0\"\r\n\r\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            isMinifyEnabled = false\r\n            proguardFiles(\r\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\r\n                \"proguard-rules.pro\"\r\n            )\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility = JavaVersion.VERSION_1_8\r\n        targetCompatibility = JavaVersion.VERSION_1_8\r\n    }\r\n    kotlinOptions {\r\n        jvmTarget = \"1.8\"\r\n    }\r\n}\r\n\r\ndependencies {\r\n\r\n    implementation(libs.androidx.core.ktx)\r\n    implementation(libs.androidx.appcompat)\r\n    implementation(libs.material)\r\n    implementation(libs.androidx.activity)\r\n    implementation(libs.androidx.constraintlayout)\r\n    testImplementation(libs.junit)\r\n    androidTestImplementation(libs.androidx.junit)\r\n    androidTestImplementation(libs.androidx.espresso.core)\r\n\r\n    // Import the Firebase BoM\r\n    implementation(platform(\"com.google.firebase:firebase-bom:32.8.1\"))\r\n    //Circluar Image Library\r\n    implementation(\"de.hdodenhof:circleimageview:3.1.0\")\r\n\r\n    implementation(\"com.google.firebase:firebase-analytics\")\r\n    //Firebase Libraries\r\n    implementation(\"com.google.firebase:firebase-auth:22.3.1\")\r\n    implementation(\"com.google.firebase:firebase-database:20.3.1\")\r\n    implementation(\"com.google.firebase:firebase-storage-ktx:19.2.2\")\r\n    //Progress Dialog\r\n    implementation(\"com.jpardogo.googleprogressbar:library:1.2.0\")\r\n\r\n    // adding a implementation of card view\r\n    implementation(\"androidx.cardview:cardview:1.0.0\")\r\n\r\n    implementation(\"com.github.bumptech.glide:glide:4.12.0\")\r\n\r\n    annotationProcessor(\"com.github.bumptech.glide:compiler:4.12.0\")\r\n\r\n    //Adding the implementation for the date range picker\r\n    implementation(\"com.google.android.material:material:1.8.0\")\r\n    //Adding the link here for github\r\n    implementation(\"com.github.AnyChart:AnyChart-Android:1.1.5\")\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+--- a/app/build.gradle.kts	(revision 59e9e582254f2e2710d392c58a3e60a7fac156c1)
++++ b/app/build.gradle.kts	(date 1717505490097)
+@@ -57,9 +57,9 @@
+ 
+     implementation("com.google.firebase:firebase-analytics")
+     //Firebase Libraries
+-    implementation("com.google.firebase:firebase-auth:22.3.1")
+-    implementation("com.google.firebase:firebase-database:20.3.1")
+-    implementation("com.google.firebase:firebase-storage-ktx:19.2.2")
++    implementation("com.google.firebase:firebase-auth")
++    implementation("com.google.firebase:firebase-database")
++    implementation("com.google.firebase:firebase-storage-ktx")
+     //Progress Dialog
+     implementation("com.jpardogo.googleprogressbar:library:1.2.0")
+ 
+@@ -74,4 +74,6 @@
+     implementation("com.google.android.material:material:1.8.0")
+     //Adding the link here for github
+     implementation("com.github.AnyChart:AnyChart-Android:1.1.5")
+-}
+\ No newline at end of file
++}
++
++apply(plugin = "com.google.gms.google-services")
+\ No newline at end of file
+Index: app/src/main/java/com/example/timevision_application/Project.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.timevision_application\r\n\r\nimport java.io.Serializable\r\n\r\ndata class Project(\r\n    var projectName: String = \"\",\r\n    var category: String = \"\",\r\n    var date: String = \"\",\r\n    var startTime: String = \"\",\r\n    var endTime: String = \"\",\r\n    var minimumDailyHours: String = \"\",\r\n    var maximumDailyHours: String = \"\",\r\n    var totalDuration: String = \"\",\r\n    var workDescription: String = \"\"\r\n) : Serializable
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/Project.kt b/app/src/main/java/com/example/timevision_application/Project.kt
+--- a/app/src/main/java/com/example/timevision_application/Project.kt	(revision 59e9e582254f2e2710d392c58a3e60a7fac156c1)
++++ b/app/src/main/java/com/example/timevision_application/Project.kt	(date 1717439609903)
+@@ -11,5 +11,6 @@
+     var minimumDailyHours: String = "",
+     var maximumDailyHours: String = "",
+     var totalDuration: String = "",
+-    var workDescription: String = ""
++    var workDescription: String = "",
++    var imagePath: String? = null
+ ) : Serializable
+\ No newline at end of file
+Index: app/src/main/res/drawable/circle_background.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/drawable/circle_background.xml b/app/src/main/res/drawable/circle_background.xml
+new file mode 100644
+--- /dev/null	(date 1717339990686)
++++ b/app/src/main/res/drawable/circle_background.xml	(date 1717339990686)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<shape xmlns:android="http://schemas.android.com/apk/res/android">
++    <solid android:color="#FFFFFF"/>
++    <corners android:radius="50dp"/>
++    <stroke android:width="2dp" android:color="#CCCCCC"/>
++</shape>
+Index: app/src/main/res/drawable/rounded_background.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/drawable/rounded_background.xml b/app/src/main/res/drawable/rounded_background.xml
+new file mode 100644
+--- /dev/null	(date 1717339914061)
++++ b/app/src/main/res/drawable/rounded_background.xml	(date 1717339914061)
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="utf-8"?>
++<shape xmlns:android="http://schemas.android.com/apk/res/android">
++    <solid android:color="#FFFFFF"/>
++    <corners android:radius="8dp"/>
++    <padding android:left="4dp"
++        android:top="4dp"
++        android:right="4dp"
++        android:bottom="4dp"/>
++    <stroke android:width="1dp" android:color="#CCCCCC"/>
++</shape>
+\ No newline at end of file
+Index: build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>buildscript {\r\n    dependencies {\r\n        classpath(libs.google.services)\r\n    }\r\n}\r\n// Top-level build file where you can add configuration options common to all sub-projects/modules.\r\nplugins {\r\n    alias(libs.plugins.androidApplication) apply false\r\n    alias(libs.plugins.jetbrainsKotlinAndroid) apply false\r\n    alias(libs.plugins.googleGmsGoogleServices) apply false\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/build.gradle.kts b/build.gradle.kts
+--- a/build.gradle.kts	(revision 59e9e582254f2e2710d392c58a3e60a7fac156c1)
++++ b/build.gradle.kts	(date 1717403949322)
+@@ -1,6 +1,7 @@
+ buildscript {
+     dependencies {
+-        classpath(libs.google.services)
++        classpath("com.google.gms:google-services:4.4.2")
++
+     }
+ }
+ // Top-level build file where you can add configuration options common to all sub-projects/modules.
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\">\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\r\n        android:fullBackupContent=\"@xml/backup_rules\"\r\n        android:icon=\"@mipmap/ic_launcher\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/Theme.TimeVision_Application\"\r\n        tools:targetApi=\"31\">\r\n        <activity\r\n            android:name=\".MainActivity\"\r\n            android:exported=\"true\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n\r\n        <!--        //Adding a another activity here-->\r\n        <activity android:name=\".ProjectDetailActivity\" />\r\n\r\n        <!--        //Adding a another activity here-->\r\n        <activity android:name=\".DatePickerActivity\" />\r\n\r\n        <!--        adding a another activity-->\r\n        <activity android:name=\".ChartsActivity\"/>\r\n\r\n        <!-- Add this line for your AddCategoryActivity -->\r\n        <activity android:name=\".AddCategoryActivity\" />\r\n\r\n        <!-- Add this line for your timeTracker-->\r\n        <activity android:name=\".TimeTrackerReport\" />\r\n\r\n        <activity android:name=\".AbsenceActivity\"/>\r\n\r\n        <activity android:name=\".Register\"\r\n            android:windowSoftInputMode=\"adjustResize\" />\r\n\r\n        <activity android:name=\".TimesheetEntry\" />\r\n\r\n        <!-- Declare the HomeScreen activity here -->\r\n        <activity android:name=\".HomeScreen\" />\r\n\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision 59e9e582254f2e2710d392c58a3e60a7fac156c1)
++++ b/app/src/main/AndroidManifest.xml	(date 1717407451337)
+@@ -2,6 +2,10 @@
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:tools="http://schemas.android.com/tools">
+ 
++    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
++    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
++
++
+     <application
+         android:allowBackup="true"
+         android:dataExtractionRules="@xml/data_extraction_rules"

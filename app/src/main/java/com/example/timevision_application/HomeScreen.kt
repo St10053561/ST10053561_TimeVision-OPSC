@@ -1,6 +1,5 @@
 package com.example.timevision_application
 
-
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageButton
@@ -38,6 +37,4 @@ class HomeScreen : AppCompatActivity() {
             startActivity(Intent(this@HomeScreen, AddCategoryActivity::class.java))
         }
     }
-
-
 }

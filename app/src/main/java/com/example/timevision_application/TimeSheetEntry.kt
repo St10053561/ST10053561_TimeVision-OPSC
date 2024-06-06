@@ -201,14 +201,14 @@ class TimesheetEntry : AppCompatActivity() {
                     val selectedImageUri: Uri? = data?.data
                     if (selectedImageUri != null) {
                         imageUri = selectedImageUri
-                        browseFilesButton.setImageURI(selectedImageUri) // Display selected image
+                        browseFilesButton.setImageURI(selectedImageUri)
                     }
                 }
 
                 CAMERA_REQUEST_CODE -> {
                     val photo: Bitmap = data?.extras?.get("data") as Bitmap
                     imageUri = getImageUri(photo)
-                    browseFilesButton.setImageBitmap(photo) // Display captured image
+                    browseFilesButton.setImageBitmap(photo)
                 }
             }
         }
@@ -227,7 +227,7 @@ class TimesheetEntry : AppCompatActivity() {
             }
             WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // Handle the permission granted case if needed
+
                 } else {
                     Toast.makeText(this, "Storage permission is required to save images", Toast.LENGTH_SHORT).show()
                 }
@@ -268,7 +268,7 @@ class TimesheetEntry : AppCompatActivity() {
 
         if (imageUri != null) {
             uploadImage(imageUri) { imageUrl ->
-                timesheetEntryData.imageUrl = imageUrl // Save image URL to the database
+                timesheetEntryData.imageUrl = imageUrl
                 timesheetEntryRef.setValue(timesheetEntryData).addOnCompleteListener { task ->
                     progressDialog.dismiss()
                     if (task.isSuccessful) {

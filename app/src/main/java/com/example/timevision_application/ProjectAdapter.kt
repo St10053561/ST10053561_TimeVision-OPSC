@@ -40,13 +40,13 @@ class ProjectAdapter(private val projectList: List<Project>) :
         holder.projectName.text = currentItem.projectName
         holder.projectCategory.text = currentItem.category
 
-        // Load image using Glide
+        // Loading the image using Glide
         if (!currentItem.imageUrl.isNullOrEmpty()) {
             Glide.with(holder.itemView)
                 .load(currentItem.imageUrl)
                 .into(holder.imageView)
         } else {
-            // Set a placeholder or default image if imageUrl is null or empty
+            // Setting the default image if imageUrl is null or empty
             holder.imageView.setImageResource(android.R.drawable.ic_menu_gallery)
         }
     }

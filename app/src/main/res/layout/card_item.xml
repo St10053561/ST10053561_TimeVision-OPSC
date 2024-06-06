@@ -51,7 +51,5 @@
             android:layout_alignTop="@id/projectName"
             android:layout_alignBottom="@id/viewDetailsButton"
             tools:srcCompat="@tools:sample/avatars" />
-
     </RelativeLayout>
-
 </androidx.cardview.widget.CardView>

@@ -22,7 +22,7 @@
 
             <ImageView
                 android:id="@+id/userPhoto"
-                android:layout_width="100dp"
+                android:layout_width="140dp"
                 android:layout_height="100dp"
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="27dp" />

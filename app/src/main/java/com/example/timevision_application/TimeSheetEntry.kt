@@ -170,7 +170,7 @@ class TimesheetEntry : AppCompatActivity() {
         startActivityForResult(pickPhotoIntent, IMAGE_PICKER_REQUEST_CODE)
     }
 
-    private fun uploadImage(imageUri: Uri, onSuccess: () -> Unit) {
+    private fun uploadImage(imageUri: Uri, onSuccess: (String) -> Unit) {
         val progressDialog = ProgressDialog(this)
         progressDialog.setTitle("Uploading...")
         progressDialog.show()
@@ -179,9 +179,11 @@ class TimesheetEntry : AppCompatActivity() {
 
         val uploadTask = imageRef.putFile(imageUri)
         uploadTask.addOnSuccessListener {
-            progressDialog.dismiss()
-            onSuccess()
-            Toast.makeText(this@TimesheetEntry, "Image Successfully Uploaded", Toast.LENGTH_SHORT).show()
+            imageRef.downloadUrl.addOnSuccessListener { uri ->
+                progressDialog.dismiss()
+                onSuccess(uri.toString()) // Pass the image URL to the callback
+                Toast.makeText(this@TimesheetEntry, "Image Successfully Uploaded", Toast.LENGTH_SHORT).show()
+            }
         }.addOnFailureListener {
             progressDialog.dismiss()
             Toast.makeText(this@TimesheetEntry, "Failed To Upload Image", Toast.LENGTH_SHORT).show()
@@ -265,8 +267,8 @@ class TimesheetEntry : AppCompatActivity() {
         val timesheetEntryRef = databaseReference.child("TimeSheetEntries").child(userId).push()
 
         if (imageUri != null) {
-            uploadImage(imageUri) {
-                timesheetEntryData.imageUrl = imageUri.toString() // Save image URL to database
+            uploadImage(imageUri) { imageUrl ->
+                timesheetEntryData.imageUrl = imageUrl // Save image URL to the database
                 timesheetEntryRef.setValue(timesheetEntryData).addOnCompleteListener { task ->
                     progressDialog.dismiss()
                     if (task.isSuccessful) {
@@ -303,5 +305,4 @@ class TimesheetEntry : AppCompatActivity() {
         var workDescription: String? = null,
         var imageUrl: String? = null
     )
-
 }

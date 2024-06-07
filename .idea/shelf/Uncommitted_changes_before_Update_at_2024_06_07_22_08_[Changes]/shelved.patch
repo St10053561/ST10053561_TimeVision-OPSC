@@ -1,0 +1,414 @@
+Index: app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.timevision_application\r\n\r\nimport android.annotation.SuppressLint\r\nimport android.os.Bundle\r\nimport android.util.Log\r\nimport android.widget.ImageView\r\nimport android.widget.TextView\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport com.anychart.AnyChartView\r\nimport com.bumptech.glide.Glide\r\nimport com.google.firebase.auth.FirebaseAuth\r\nimport com.google.firebase.database.DataSnapshot\r\nimport com.google.firebase.database.DatabaseError\r\nimport com.google.firebase.database.FirebaseDatabase\r\nimport com.google.firebase.database.ValueEventListener\r\nimport com.google.firebase.storage.ktx.storage\r\nimport com.google.firebase.ktx.Firebase\r\n\r\nclass ProjectDetailActivity : AppCompatActivity() {\r\n\r\n    private val hoursMap = HashMap<String, MutableList<Int>>()\r\n\r\n    @SuppressLint(\"SetTextI18n\")\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContentView(R.layout.activity_project_detail)\r\n\r\n        val projectName: TextView = findViewById(R.id.projectName)\r\n        val projectCategory: TextView = findViewById(R.id.projectCategory)\r\n        val description: TextView = findViewById(R.id.description)\r\n        val hours: TextView = findViewById(R.id.hours)\r\n        val userPhoto: ImageView = findViewById(R.id.userPhoto)\r\n        val projectDate: TextView = findViewById(R.id.projectDate)\r\n        val anyChartView: AnyChartView = findViewById(R.id.any_chart_view)\r\n\r\n        val project = intent.getSerializableExtra(\"project\") as? Project\r\n\r\n        if (project != null) {\r\n            projectName.text = project.projectName\r\n            projectCategory.text = projectCategory.text.toString() + project.category\r\n            description.text = description.text.toString() + \"\\n\" + project.workDescription\r\n            hours.text = hours.text.toString() + \"${project.minimumDailyHours} - ${project.maximumDailyHours}\"\r\n            projectDate.text = projectDate.text.toString() + project.date\r\n\r\n            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return\r\n\r\n            val database = FirebaseDatabase.getInstance().getReference(\"TimeSheetEntries\")\r\n            database.child(currentUserId).addValueEventListener(object : ValueEventListener {\r\n                override fun onDataChange(dataSnapshot: DataSnapshot) {\r\n                    if (hoursMap.isEmpty()) {\r\n                        for (projectSnapshot in dataSnapshot.children) {\r\n                            val project = projectSnapshot.getValue(Project::class.java)\r\n                            if (project != null) {\r\n                                val minHours = project.minimumDailyHours.toInt()\r\n                                val maxHours = project.maximumDailyHours.toInt()\r\n                                val hoursList = hoursMap.getOrPut(projectSnapshot.key!!) { MutableList(7) { 0 } }\r\n                                for (i in 0 until 7) {\r\n                                    val randomHours = (minHours..maxHours).random()\r\n                                    hoursList[i] = randomHours\r\n                                }\r\n                            }\r\n                        }\r\n                    }\r\n\r\n                    for ((projectId, hoursList) in hoursMap) {\r\n\r\n                        ChartsActivity.ChartUtils.setupLineChart(anyChartView, hoursList)\r\n                    }\r\n                }\r\n\r\n                override fun onCancelled(databaseError: DatabaseError) {\r\n                    Log.e(\"ProjectDetailActivity\", \"Error loading data: ${databaseError.message}\")\r\n                }\r\n            })\r\n\r\n            // Check if project contains image URL\r\n            if (!project.imageUrl.isNullOrEmpty()) {\r\n                val imageUrl = project.imageUrl\r\n                Glide.with(this)\r\n                    .load(imageUrl)\r\n                    .into(userPhoto)\r\n            } else {\r\n                userPhoto.setImageResource(R.drawable.ic_add_image)\r\n            }\r\n        }\r\n    }\r\n}\r\n\r\n\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt b/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt
+--- a/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt	(revision 2cd0029d092cf0f5d135802a13066469eb2de916)
++++ b/app/src/main/java/com/example/timevision_application/ProjectDetailActivity.kt	(date 1717788514947)
+@@ -2,76 +2,55 @@
+ 
+ import android.annotation.SuppressLint
+ import android.os.Bundle
+-import android.util.Log
++import android.widget.Button
+ import android.widget.ImageView
+ import android.widget.TextView
+ import androidx.appcompat.app.AppCompatActivity
+ import com.anychart.AnyChartView
+ import com.bumptech.glide.Glide
+-import com.google.firebase.auth.FirebaseAuth
+-import com.google.firebase.database.DataSnapshot
+-import com.google.firebase.database.DatabaseError
+-import com.google.firebase.database.FirebaseDatabase
+-import com.google.firebase.database.ValueEventListener
+-import com.google.firebase.storage.ktx.storage
+-import com.google.firebase.ktx.Firebase
++import java.text.SimpleDateFormat
++import java.util.*
++import kotlin.collections.HashMap
++import kotlin.random.Random
+ 
+ class ProjectDetailActivity : AppCompatActivity() {
+ 
+-    private val hoursMap = HashMap<String, MutableList<Int>>()
++    private lateinit var anyChartView: AnyChartView
++    private lateinit var projectName: TextView
++    private lateinit var projectCategory: TextView
++    private lateinit var description: TextView
++    private lateinit var hours: TextView
++    private lateinit var userPhoto: ImageView
++    private lateinit var projectDate: TextView
++    private lateinit var currentMonthButton: Button
++    private lateinit var previousMonthButton: Button
++
++    private val currentMonthHoursMap = HashMap<String, MutableList<Int>>()
++    private val previousMonthHoursMap = HashMap<String, MutableList<Int>>()
+ 
+     @SuppressLint("SetTextI18n")
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+         setContentView(R.layout.activity_project_detail)
+ 
+-        val projectName: TextView = findViewById(R.id.projectName)
+-        val projectCategory: TextView = findViewById(R.id.projectCategory)
+-        val description: TextView = findViewById(R.id.description)
+-        val hours: TextView = findViewById(R.id.hours)
+-        val userPhoto: ImageView = findViewById(R.id.userPhoto)
+-        val projectDate: TextView = findViewById(R.id.projectDate)
+-        val anyChartView: AnyChartView = findViewById(R.id.any_chart_view)
++        projectName = findViewById(R.id.projectName)
++        projectCategory = findViewById(R.id.projectCategory)
++        description = findViewById(R.id.description)
++        hours = findViewById(R.id.hours)
++        userPhoto = findViewById(R.id.userPhoto)
++        projectDate = findViewById(R.id.projectDate)
++        anyChartView = findViewById(R.id.any_chart_view)
++        currentMonthButton = findViewById(R.id.currentMonthButton)
++        previousMonthButton = findViewById(R.id.previousMonthButton)
+ 
+         val project = intent.getSerializableExtra("project") as? Project
+ 
+         if (project != null) {
+             projectName.text = project.projectName
+-            projectCategory.text = projectCategory.text.toString() + project.category
+-            description.text = description.text.toString() + "\n" + project.workDescription
+-            hours.text = hours.text.toString() + "${project.minimumDailyHours} - ${project.maximumDailyHours}"
+-            projectDate.text = projectDate.text.toString() + project.date
+-
+-            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+-
+-            val database = FirebaseDatabase.getInstance().getReference("TimeSheetEntries")
+-            database.child(currentUserId).addValueEventListener(object : ValueEventListener {
+-                override fun onDataChange(dataSnapshot: DataSnapshot) {
+-                    if (hoursMap.isEmpty()) {
+-                        for (projectSnapshot in dataSnapshot.children) {
+-                            val project = projectSnapshot.getValue(Project::class.java)
+-                            if (project != null) {
+-                                val minHours = project.minimumDailyHours.toInt()
+-                                val maxHours = project.maximumDailyHours.toInt()
+-                                val hoursList = hoursMap.getOrPut(projectSnapshot.key!!) { MutableList(7) { 0 } }
+-                                for (i in 0 until 7) {
+-                                    val randomHours = (minHours..maxHours).random()
+-                                    hoursList[i] = randomHours
+-                                }
+-                            }
+-                        }
+-                    }
+-
+-                    for ((projectId, hoursList) in hoursMap) {
+-
+-                        ChartsActivity.ChartUtils.setupLineChart(anyChartView, hoursList)
+-                    }
+-                }
+-
+-                override fun onCancelled(databaseError: DatabaseError) {
+-                    Log.e("ProjectDetailActivity", "Error loading data: ${databaseError.message}")
+-                }
+-            })
++            projectCategory.text = getString(R.string.project_category) + project.category
++            description.text = getString(R.string.project_description) + project.workDescription
++            hours.text = getString(R.string.working_hours) + " ${project.minimumDailyHours} - ${project.maximumDailyHours}"
++            projectDate.text = getString(R.string.project_start_date) + " ${project.date}"
+ 
+             // Check if project contains image URL
+             if (!project.imageUrl.isNullOrEmpty()) {
+@@ -80,11 +59,93 @@
+                     .load(imageUrl)
+                     .into(userPhoto)
+             } else {
+-                userPhoto.setImageResource(R.drawable.ic_add_image)
++                userPhoto.setImageResource(android.R.drawable.ic_menu_gallery)
+             }
++
++            // Generate random hours for the current and previous month
++            currentMonthHoursMap.putAll(generateRandomHoursForCurrentMonth(project.minimumDailyHours.toInt(), project.maximumDailyHours.toInt(), project.date))
++            previousMonthHoursMap.putAll(generateRandomHoursForPreviousMonth(project.date))
++
++            // Setup the chart for the current month
++            setupChart(currentMonthHoursMap, project.date, 0)
++
++            previousMonthButton.setOnClickListener {
++                // Regenerate random hours for the previous month
++                previousMonthHoursMap.clear()
++                previousMonthHoursMap.putAll(generateRandomHoursForPreviousMonth(project.date))
++
++                // Setup the chart for the previous month
++                setupChart(previousMonthHoursMap, project.date, -1)
++            }
++
++            currentMonthButton.setOnClickListener {
++                // Regenerate random hours for the current month
++                currentMonthHoursMap.clear()
++                currentMonthHoursMap.putAll(generateRandomHoursForCurrentMonth(project.minimumDailyHours.toInt(), project.maximumDailyHours.toInt(), project.date))
++
++                // Setup the chart for the current month
++                setupChart(currentMonthHoursMap, project.date, 0)
++            }
++
+         }
+     }
+-}
++
++    private fun generateRandomHoursForCurrentMonth(minHours: Int, maxHours: Int, projectDate: String): HashMap<String, MutableList<Int>> {
++    val hoursMap = HashMap<String, MutableList<Int>>()
++    val calendar = Calendar.getInstance()
++    val sdf = SimpleDateFormat("MMM yyyy", Locale.getDefault()) // Include year in the key
++    val month = sdf.format(calendar.time)
++
++    // Determine the current day of the week
++    val currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
++
++    // Generate random hours for each day of the week starting from Monday
++    for (i in Calendar.MONDAY..Calendar.SUNDAY) {
++        val hoursList = mutableListOf<Int>()
++        for (j in 1..7) {
++            val randomHours = (minHours..maxHours).random()
++            hoursList.add(randomHours)
++        }
+ 
++        // Reorder the list to start from the current day of the week
++        Collections.rotate(hoursList, Calendar.MONDAY - currentDayOfWeek)
+ 
++        hoursMap["$month Day $i"] = hoursList
++    }
++
++    return hoursMap
++}
++
++private fun generateRandomHoursForPreviousMonth(projectDate: String): HashMap<String, MutableList<Int>> {
++    val hoursMap = HashMap<String, MutableList<Int>>()
++    val calendar = Calendar.getInstance()
++    val sdf = SimpleDateFormat("MMM yyyy", Locale.getDefault()) // Include year in the key
++    calendar.add(Calendar.MONTH, -1)
++    val month = sdf.format(calendar.time)
++
++    // Generate random minimum and maximum hours for each day of the week
++    val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
++    for (i in 1..daysInMonth) {
++        val hoursList = mutableListOf<Int>()
++        for (j in 1..7) {
++            val randomMinHours = Random.nextInt(1, 5)
++            val randomMaxHours = Random.nextInt(5, 10)
++            hoursList.add(randomMinHours)
++            hoursList.add(randomMaxHours)
++        }
++        hoursMap["$month Day $i"] = hoursList
++    }
++
++    return hoursMap
++}
++
++    private fun setupChart(hoursList: HashMap<String, MutableList<Int>>, projectDate: String, monthOffset: Int) {
++        val minHours = 1
++        val maxHours = 8
++        ChartsActivity.ChartUtils.setupLineChart(anyChartView, hoursList.values.flatten(), minHours, maxHours, projectDate, monthOffset)
++    }
++    private fun setupChartForCurrentMonth(hoursList: List<Int>, minHours: Int, maxHours: Int, projectDate: String, monthOffset: Int) {
++        ChartsActivity.ChartUtils.setupLineChart(anyChartView, hoursList, minHours, maxHours, projectDate, monthOffset)
++    }
++}
+ 
+Index: app/src/main/res/layout/activity_project_detail.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<ScrollView xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:layout_marginTop=\"30dp\"\r\n    android:background=\"#f8f8f8\">\r\n\r\n    <LinearLayout\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:orientation=\"vertical\"\r\n        android:padding=\"16dp\"\r\n        android:background=\"@drawable/card_background\">\r\n\r\n        <RelativeLayout\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:padding=\"16dp\"\r\n            android:background=\"@drawable/rounded_background\"\r\n            android:layout_marginBottom=\"16dp\">\r\n\r\n            <ImageView\r\n                android:id=\"@+id/userPhoto\"\r\n                android:layout_width=\"140dp\"\r\n                android:layout_height=\"100dp\"\r\n                android:layout_alignParentEnd=\"true\"\r\n                android:layout_marginEnd=\"27dp\" />\r\n\r\n            <TextView\r\n                android:id=\"@+id/projectName\"\r\n                android:layout_width=\"wrap_content\"\r\n                android:layout_height=\"wrap_content\"\r\n                android:layout_toStartOf=\"@id/userPhoto\"\r\n                android:layout_alignParentStart=\"true\"\r\n                android:layout_centerVertical=\"true\"\r\n                android:text=\"Project Name\"\r\n                android:textSize=\"20sp\"\r\n                android:textStyle=\"bold\"\r\n                android:textColor=\"#333333\"\r\n                android:layout_marginEnd=\"16dp\" />\r\n        </RelativeLayout>\r\n\r\n        <TextView\r\n            android:id=\"@+id/projectCategory\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginTop=\"8dp\"\r\n            android:text=\"Project Category: \"\r\n            android:textSize=\"16sp\"\r\n            android:textColor=\"#666666\"\r\n            android:padding=\"8dp\"\r\n            android:background=\"@drawable/rounded_background\" />\r\n\r\n        <TextView\r\n            android:id=\"@+id/description\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginTop=\"8dp\"\r\n            android:text=\"Project Description: \"\r\n            android:textSize=\"16sp\"\r\n            android:textColor=\"#666666\"\r\n            android:padding=\"8dp\"\r\n            android:background=\"@drawable/rounded_background\" />\r\n\r\n        <TextView\r\n            android:id=\"@+id/hours\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginTop=\"8dp\"\r\n            android:text=\"Working Hours (Min - Max): \"\r\n            android:textSize=\"16sp\"\r\n            android:textColor=\"#666666\"\r\n            android:padding=\"8dp\"\r\n            android:background=\"@drawable/rounded_background\" />\r\n\r\n        <TextView\r\n            android:id=\"@+id/projectDate\"\r\n            android:layout_width=\"wrap_content\"\r\n            android:layout_height=\"wrap_content\"\r\n            android:layout_marginTop=\"8dp\"\r\n            android:text=\"Project Start Date: \"\r\n            android:textSize=\"16sp\"\r\n            android:textColor=\"#666666\"\r\n            android:padding=\"8dp\"\r\n            android:background=\"@drawable/rounded_background\" />\r\n\r\n        <include layout=\"@layout/activity_chart\" />\r\n    </LinearLayout>\r\n</ScrollView>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_project_detail.xml b/app/src/main/res/layout/activity_project_detail.xml
+--- a/app/src/main/res/layout/activity_project_detail.xml	(revision 2cd0029d092cf0f5d135802a13066469eb2de916)
++++ b/app/src/main/res/layout/activity_project_detail.xml	(date 1717752737796)
+@@ -85,6 +85,25 @@
+             android:padding="8dp"
+             android:background="@drawable/rounded_background" />
+ 
+-        <include layout="@layout/activity_chart" />
++        <Button
++            android:id="@+id/currentMonthButton"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="8dp"
++            android:text="Current Month" />
++
++        <Button
++            android:id="@+id/previousMonthButton"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="8dp"
++            android:text="Previous Month" />
++
++        <com.anychart.AnyChartView
++            android:id="@+id/any_chart_view"
++            android:layout_width="match_parent"
++            android:layout_height="466dp" />
++
+     </LinearLayout>
+ </ScrollView>
++
+Index: app/src/main/java/com/example/timevision_application/ChartsActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.timevision_application\r\n\r\n\r\nimport android.os.Bundle\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport com.anychart.AnyChart\r\nimport com.anychart.AnyChartView\r\nimport com.anychart.chart.common.dataentry.DataEntry\r\nimport com.anychart.chart.common.dataentry.ValueDataEntry\r\nimport com.anychart.charts.Cartesian\r\nimport com.anychart.core.cartesian.series.Line\r\nimport com.anychart.data.Mapping\r\nimport kotlin.random.Random\r\n\r\nclass ChartsActivity : AppCompatActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContentView(R.layout.activity_chart)\r\n\r\n\r\n    }\r\n\r\n    object ChartUtils {\r\n        // Function to set up the line chart\r\n        fun setupLineChart(anyChartView: AnyChartView, hoursList: List<Int>) {\r\n            // Create a line chart\r\n            val cartesian: Cartesian = AnyChart.line()\r\n\r\n            // Initialize a list to store the data entries for the chart\r\n            val data: MutableList<DataEntry> = ArrayList()\r\n            // List of days of the week\r\n            val daysOfWeek = listOf(\"Mon\", \"Tue\", \"Wed\", \"Thu\", \"Fri\", \"Sat\", \"Sun\")\r\n            // Loop through each day of the week\r\n            for ((index, day) in daysOfWeek.withIndex()) {\r\n                // Add a new data entry for each day with the hours from the hoursList\r\n                data.add(ValueDataEntry(day, hoursList[index]))\r\n            }\r\n\r\n            // Create a set of data and add the data entries to it\r\n            val set: com.anychart.data.Set = com.anychart.data.Set.instantiate()\r\n            set.data(data)\r\n\r\n            // Map the data for the line chart\r\n            val lineData: Mapping = set.mapAs(\"{ x: 'x', value: 'value' }\")\r\n            // Create a line series with the mapped data\r\n            val series: Line = cartesian.line(lineData)\r\n\r\n            // Set the stroke settings for the line\r\n            series.stroke(\"blue\", 2f, \"10 5\", \"round\", \"round\")\r\n\r\n            // Set the title of the chart\r\n            cartesian.title(\"Weekly Category Data\")\r\n\r\n            // Set the title of the x-axis and y-axis\r\n            cartesian.xAxis(0).title(\"Days\")\r\n            cartesian.yAxis(0).title(\"Hours\")\r\n\r\n            // Enable tooltips for the chart\r\n            cartesian.tooltip().enabled(true)\r\n\r\n            // Set the chart in the AnyChartView\r\n            anyChartView.setChart(cartesian)\r\n        }\r\n    }\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/ChartsActivity.kt b/app/src/main/java/com/example/timevision_application/ChartsActivity.kt
+--- a/app/src/main/java/com/example/timevision_application/ChartsActivity.kt	(revision 2cd0029d092cf0f5d135802a13066469eb2de916)
++++ b/app/src/main/java/com/example/timevision_application/ChartsActivity.kt	(date 1717778929810)
+@@ -1,7 +1,8 @@
+ package com.example.timevision_application
+ 
+-
++import android.icu.text.SimpleDateFormat
+ import android.os.Bundle
++import android.util.Log
+ import androidx.appcompat.app.AppCompatActivity
+ import com.anychart.AnyChart
+ import com.anychart.AnyChartView
+@@ -10,57 +11,77 @@
+ import com.anychart.charts.Cartesian
+ import com.anychart.core.cartesian.series.Line
+ import com.anychart.data.Mapping
+-import kotlin.random.Random
++import java.util.*
+ 
+ class ChartsActivity : AppCompatActivity() {
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+         setContentView(R.layout.activity_chart)
+-
+-
+     }
+ 
+     object ChartUtils {
+-        // Function to set up the line chart
+-        fun setupLineChart(anyChartView: AnyChartView, hoursList: List<Int>) {
+-            // Create a line chart
++        fun setupLineChart(
++            anyChartView: AnyChartView,
++            hoursList: List<Int>,
++            minHours: Int,
++            maxHours: Int,
++            projectDate: String,
++            monthOffset: Int
++        ) {
++            Log.d(
++                "Chart Setup",
++                "Setting up chart in ChartsActivity. Received monthOffset: $monthOffset"
++            )
++            anyChartView.clear()
+             val cartesian: Cartesian = AnyChart.line()
+-
+-            // Initialize a list to store the data entries for the chart
+             val data: MutableList<DataEntry> = ArrayList()
+-            // List of days of the week
+             val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+-            // Loop through each day of the week
+-            for ((index, day) in daysOfWeek.withIndex()) {
+-                // Add a new data entry for each day with the hours from the hoursList
+-                data.add(ValueDataEntry(day, hoursList[index]))
++            val weeksOfMonth = listOf("Week 1", "Week 2", "Week 3", "Week 4")
++
++            val labels = if (monthOffset < 0) weeksOfMonth else daysOfWeek
++            for ((index, label) in labels.withIndex()) {
++                val hours = if (monthOffset < 0) (minHours..maxHours).random() else {
++                    if (hoursList.isNotEmpty()) hoursList[index] else 0 // Default value if hoursList is empty
++                }
++                data.add(ValueDataEntry(label, hours))
+             }
+ 
+-            // Create a set of data and add the data entries to it
+             val set: com.anychart.data.Set = com.anychart.data.Set.instantiate()
+             set.data(data)
+-
+-            // Map the data for the line chart
+             val lineData: Mapping = set.mapAs("{ x: 'x', value: 'value' }")
+-            // Create a line series with the mapped data
+             val series: Line = cartesian.line(lineData)
+-
+-            // Set the stroke settings for the line
+             series.stroke("blue", 2f, "10 5", "round", "round")
+ 
+-            // Set the title of the chart
+-            cartesian.title("Weekly Category Data")
++            // Create data for min and max lines
++            val minLineData = labels.map { ValueDataEntry(it, minHours) }
++            val maxLineData = labels.map { ValueDataEntry(it, maxHours) }
++            cartesian.line(minLineData).stroke("2 red")
++            cartesian.line(maxLineData).stroke("2 green")
+ 
+-            // Set the title of the x-axis and y-axis
+-            cartesian.xAxis(0).title("Days")
++            // Update the chart title
++            updateChartTitle(cartesian, projectDate, monthOffset)
++
++            cartesian.xAxis(0).title(if (monthOffset < 0) "Weeks" else "Days")
+             cartesian.yAxis(0).title("Hours")
+-
+-            // Enable tooltips for the chart
++            cartesian.yScale().ticks().interval(1)
+             cartesian.tooltip().enabled(true)
+-
+-            // Set the chart in the AnyChartView
+             anyChartView.setChart(cartesian)
++            anyChartView.invalidate() // Force a redraw of the chart
++        }
++
++        private fun updateChartTitle(cartesian: Cartesian, projectDate: String, monthOffset: Int) {
++            // Parse the project date to get the month name
++            val inputFormat = SimpleDateFormat("d/M/yyyy", Locale.ENGLISH)
++            val outputFormat = SimpleDateFormat("MMMM", Locale.ENGLISH)
++            val date = inputFormat.parse(projectDate)
++            val calendar = Calendar.getInstance()
++            calendar.time = date
++            calendar.add(Calendar.MONTH, monthOffset)
++            val monthName = outputFormat.format(calendar.time)
++
++            cartesian.title(if (monthOffset < 0) "$monthName Weeks Data" else "$monthName Days Data")
+         }
+     }
++}
++
+ 
+-}
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_chart.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<ScrollView xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    android:layout_marginTop=\"30dp\">\r\n\r\n    <LinearLayout\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:orientation=\"vertical\"\r\n        android:padding=\"16dp\">\r\n\r\n        <com.anychart.AnyChartView\r\n            android:id=\"@+id/any_chart_view\"\r\n            android:layout_width=\"418dp\"\r\n            android:layout_height=\"466dp\" />\r\n\r\n    </LinearLayout>\r\n\r\n</ScrollView>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_chart.xml b/app/src/main/res/layout/activity_chart.xml
+--- a/app/src/main/res/layout/activity_chart.xml	(revision 2cd0029d092cf0f5d135802a13066469eb2de916)
++++ b/app/src/main/res/layout/activity_chart.xml	(date 1717714607626)
+@@ -18,4 +18,4 @@
+ 
+     </LinearLayout>
+ 
+-</ScrollView>
+\ No newline at end of file
++</ScrollView>
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources>\r\n    <string name=\"app_name\">TimeVisionPrototype</string>\r\n    <string name=\"absence_request_form\">Absence Request Form</string>\r\n    <string name=\"report\">Report</string>\r\n    <string name=\"time_sheet_entries_table\">Time Sheet Entries Table</string>\r\n    <string name=\"time_sheet_entry_form\">Time Sheet Entry Form</string>\r\n    <string name=\"envision_the_future_one_tick_at_a_time\">Envision the Future, One Tick at a Time.</string>\r\n    <string name=\"timevision\">TimeVision.</string>\r\n    <string name=\"sign_up\">Sign up</string>\r\n    <string name=\"login\">Login</string>\r\n    <string name=\"confirm_password\">Confirm Password</string>\r\n    <string name=\"password\">Password</string>\r\n    <string name=\"username\">Username</string>\r\n    <string name=\"email\">Email</string>\r\n    <string name=\"pick_date_of_birth\">Pick Date of Birth</string>\r\n    <string name=\"surname\">Surname</string>\r\n    <string name=\"name\">Name</string>\r\n    <string name=\"already_registered_log_in_here\">Already Registered? Log in here.</string>\r\n    <string name=\"create_new_account\">Create new Account</string>\r\n    <string name=\"category\">Categories</string>\r\n    <string name=\"pick_end_time\">Max Hrs/Day</string>\r\n    <string name=\"total_duration\">Hrs/Week</string>\r\n    <string name=\"pick_start_time\">Min Hrs/Day</string>\r\n    <string name=\"pick_end_date\">Pick End Time</string>\r\n    <string name=\"pick_start_date\">Pick Start Time</string>\r\n    <string name=\"enter_category\">Enter Category</string>\r\n    <string name=\"select_date\">Select Date</string>\r\n    <string name=\"enter_project_name\">Enter Project Name</string>\r\n    <string name=\"browse_files\">Browse Files</string>\r\n    <string name=\"picture_upload\">Take Picture/Upload Image</string>\r\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+--- a/app/src/main/res/values/strings.xml	(revision 2cd0029d092cf0f5d135802a13066469eb2de916)
++++ b/app/src/main/res/values/strings.xml	(date 1717703135454)
+@@ -28,4 +28,8 @@
+     <string name="enter_project_name">Enter Project Name</string>
+     <string name="browse_files">Browse Files</string>
+     <string name="picture_upload">Take Picture/Upload Image</string>
++    <string name="project_category">Project Category: </string>
++    <string name="project_description">Project Description: </string>
++    <string name="working_hours">Working Hours (Min - Max): </string>
++    <string name="project_start_date">Project Start Date: </string>
+ </resources>
+\ No newline at end of file

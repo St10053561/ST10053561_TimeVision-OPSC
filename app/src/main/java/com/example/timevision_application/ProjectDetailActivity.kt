@@ -2,30 +2,28 @@ package com.example.timevision_application
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.anychart.AnyChart
 import com.anychart.AnyChartView
-import com.anychart.chart.common.dataentry.DataEntry
-import com.anychart.chart.common.dataentry.ValueDataEntry
-import com.anychart.charts.Cartesian
-import com.anychart.core.cartesian.series.Line
-import com.anychart.data.Mapping
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 
+@Suppress("NAME_SHADOWING")
 class ProjectDetailActivity : AppCompatActivity() {
 
     // Declare hoursMap as a member variable
     private val hoursMap = HashMap<String, MutableList<Int>>()
+
+    // Declare currentMonthOffset as a member variable
+    private var currentMonthOffset = 0
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +37,17 @@ class ProjectDetailActivity : AppCompatActivity() {
         val userPhoto: ImageView = findViewById(R.id.userPhoto)
         val projectDate: TextView = findViewById(R.id.projectDate)
 
+// Show instructions to the user
+        val instructions = "To view the results for a specific month:\n\n" +
+                "1. Click on 'Current Month' to view the current month's results.\n" +
+                "2. Click on 'Previous Month' to view the previous month's results.\n\n" +
+                "Please note: To switch between months, you need to exit the project and come back."
+        AlertDialog.Builder(this)
+            .setTitle("Instructions")
+            .setMessage(instructions)
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .show()
+
         val project = intent.getSerializableExtra("project") as? Project
 
         if (project != null) {
@@ -49,19 +58,42 @@ class ProjectDetailActivity : AppCompatActivity() {
                 hours.text.toString() + "${project.minimumDailyHours} - ${project.maximumDailyHours}"
             projectDate.text = projectDate.text.toString() + project.date
 
-            // Assuming totalDuration is a comma-separated string of integers
             val anyChartView: AnyChartView = findViewById(R.id.any_chart_view)
-            // Assuming totalDuration is a comma-separated string of integers
-            val totalDurationList = if (project.totalDuration.isNotEmpty()) {
-                project.totalDuration.split(",").map { it.trim().toInt() }
+
+            // Check if the project has an imageUrl
+            if (project.imageUrl.isNotEmpty()) {
+                // Use Glide to load the image into the ImageView
+                Glide.with(this)
+                    .load(project.imageUrl)
+                    .into(userPhoto)
             } else {
-                emptyList()
+                // Set a default image or make the ImageView invisible
+                userPhoto.setImageResource(R.drawable.person)
+            }
+            // Get references to the buttons
+            val currentMonthButton: Button = findViewById(R.id.currentMonthButton)
+            val previousMonthButton: Button = findViewById(R.id.previousMonthButton)
+
+
+            currentMonthButton.setOnClickListener {
+                currentMonthOffset = 0
+                Log.d(
+                    "Button Click",
+                    "Current Month Button clicked. currentMonthOffset set to $currentMonthOffset"
+                )
+                setupChartForCurrentOffset()
             }
 
-
+            previousMonthButton.setOnClickListener {
+                currentMonthOffset -= 1
+                Log.d(
+                    "Button Click",
+                    "Previous Month Button clicked. currentMonthOffset set to $currentMonthOffset"
+                )
+                setupChartForCurrentOffset()
+            }
             // Get the current user ID
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-
             val database = FirebaseDatabase.getInstance().getReference("TimeSheetEntries")
 
             database.child(currentUserId!!).addValueEventListener(object : ValueEventListener {
@@ -87,39 +119,50 @@ class ProjectDetailActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Iterate over the hoursMap and setup the line chart for each project
-                    for ((projectId, hoursList) in hoursMap) {
-                        val anyChartView: AnyChartView = findViewById(R.id.any_chart_view)
-                        ChartsActivity.ChartUtils.setupLineChart(anyChartView, hoursList)
-                    }
+                    setupChartForCurrentOffset()
+
+                    // Setup the initial chart with the current project date
+                    project?.date?.let { setupChartForCurrentOffset() }
+
+
                 }
+
 
                 override fun onCancelled(databaseError: DatabaseError) {
                     // Handle possible errors.
                 }
             })
+        }
+    }
 
-            // Get a reference to the ImageView
-            val userPhoto: ImageView = findViewById(R.id.userPhoto)
+    private fun setupChartForCurrentOffset() {
+        Log.d("Chart Setup", "Setting up chart for currentMonthOffset $currentMonthOffset")
+        for ((projectId, originalHoursList) in hoursMap) {
+            val anyChartView: AnyChartView = findViewById(R.id.any_chart_view)
+            anyChartView.clear() // Clear the chart
+            val project = intent.getSerializableExtra("project") as? Project
+            if (project != null) {
+                val minHours = project.minimumDailyHours.toInt()
+                val maxHours = project.maximumDailyHours.toInt()
 
-            // Get a reference to the Firebase Storage instance
-            val storage = Firebase.storage
+                // Generate random hours for each week when currentMonthOffset is less than 0
+                val hours =
+                    if (currentMonthOffset < 0) MutableList(4) { (minHours..maxHours).random() } else originalHoursList
 
+                // Log the values of currentMonthOffset, hours, and originalHoursList
+                Log.d("Chart Setup", "currentMonthOffset: $currentMonthOffset")
+                Log.d("Chart Setup", "hours: $hours")
+                Log.d("Chart Setup", "originalHoursList: $originalHoursList")
 
-// Provide the path to the image within the bucket
-            val imageRef =
-                storage.reference.child("images/OoLYzP9VPTa97vuUzOW3wijgjFv1/83c34f93-db6b-4d5d-a4ae-6fb250893ac1")
-
-            imageRef.downloadUrl.addOnSuccessListener { uri ->
-                // Use Glide to load the image into the ImageView
-                Glide.with(this /* context */)
-                    .load(uri)
-                    .into(userPhoto)
-            }.addOnFailureListener {
-                // Load default image from drawable when image download fails
-                userPhoto.setImageResource(R.drawable.person)
+                ChartsActivity.ChartUtils.setupLineChart(
+                    anyChartView,
+                    hours,
+                    minHours,
+                    maxHours,
+                    project.date,
+                    currentMonthOffset
+                )
             }
-
         }
     }
 }

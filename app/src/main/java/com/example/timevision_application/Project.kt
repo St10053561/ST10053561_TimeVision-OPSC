@@ -11,5 +11,6 @@ data class Project(
     var minimumDailyHours: String = "",
     var maximumDailyHours: String = "",
     var totalDuration: String = "",
-    var workDescription: String = ""
+    var workDescription: String = "",
+    var imageUrl: String = ""
 ) : Serializable

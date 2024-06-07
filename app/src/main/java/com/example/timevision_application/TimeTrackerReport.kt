@@ -47,7 +47,7 @@ class TimeTrackerReport : AppCompatActivity() {
         // Find the button in the layout
         val openDatePickerButton: Button = findViewById(R.id.openDatePickerButton)
 
-// Do something when the button is clicked
+        // Do something when the button is clicked
         openDatePickerButton.setOnClickListener {
             // Create an intent to open the DatePickerActivity
             val intent = Intent(this, DatePickerActivity::class.java)
@@ -55,8 +55,14 @@ class TimeTrackerReport : AppCompatActivity() {
             startActivityForResult(intent, DATE_PICKER_REQUEST)
         }
 
-
+        // Find the backButton button by its ID
+        val backButton: Button = findViewById(R.id.backButton)
+        // Set a click listener for the backButton button
+        backButton.setOnClickListener {
+            onBackPressed()
+        }
     }
+
 
     private fun FullScreenMode() {
         // Hide the status bar.
@@ -130,6 +136,13 @@ class TimeTrackerReport : AppCompatActivity() {
         }
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        // Start the HomeScreen activity when the backButton is pressed
+        startActivity(Intent(this, HomeScreen::class.java))
+        // Finish the current activity
+        finish()
+    }
 
     companion object {
 

@@ -1,7 +1,8 @@
 package com.example.timevision_application
 
-
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.anychart.AnyChart
 import com.anychart.AnyChartView
@@ -10,57 +11,76 @@ import com.anychart.chart.common.dataentry.ValueDataEntry
 import com.anychart.charts.Cartesian
 import com.anychart.core.cartesian.series.Line
 import com.anychart.data.Mapping
-import kotlin.random.Random
+import java.util.*
 
 class ChartsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chart)
-
-
     }
 
     object ChartUtils {
-        // Function to set up the line chart
-        fun setupLineChart(anyChartView: AnyChartView, hoursList: List<Int>) {
-            // Create a line chart
+        fun setupLineChart(
+            anyChartView: AnyChartView,
+            hoursList: List<Int>,
+            minHours: Int,
+            maxHours: Int,
+            projectDate: String,
+            monthOffset: Int
+        ) {
+            Log.d(
+                "Chart Setup",
+                "Setting up chart in ChartsActivity. Received monthOffset: $monthOffset"
+            )
+            anyChartView.clear()
             val cartesian: Cartesian = AnyChart.line()
-
-            // Initialize a list to store the data entries for the chart
             val data: MutableList<DataEntry> = ArrayList()
-            // List of days of the week
             val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-            // Loop through each day of the week
-            for ((index, day) in daysOfWeek.withIndex()) {
-                // Add a new data entry for each day with the hours from the hoursList
-                data.add(ValueDataEntry(day, hoursList[index]))
+            val weeksOfMonth = listOf("Week 1", "Week 2", "Week 3", "Week 4")
+
+            val labels = if (monthOffset < 0) weeksOfMonth else daysOfWeek
+            for ((index, label) in labels.withIndex()) {
+                val hours =
+                    if (index < hoursList.size) hoursList[index] else 0 // Default value if hoursList is not long enough
+                data.add(ValueDataEntry(label, hours))
             }
 
-            // Create a set of data and add the data entries to it
+
             val set: com.anychart.data.Set = com.anychart.data.Set.instantiate()
             set.data(data)
-
-            // Map the data for the line chart
             val lineData: Mapping = set.mapAs("{ x: 'x', value: 'value' }")
-            // Create a line series with the mapped data
             val series: Line = cartesian.line(lineData)
-
-            // Set the stroke settings for the line
             series.stroke("blue", 2f, "10 5", "round", "round")
 
-            // Set the title of the chart
-            cartesian.title("Weekly Category Data")
+            // Create data for min and max lines
+            val minLineData = labels.map { ValueDataEntry(it, minHours) }
+            val maxLineData = labels.map { ValueDataEntry(it, maxHours) }
+            cartesian.line(minLineData).stroke("2 red")
+            cartesian.line(maxLineData).stroke("2 green")
 
-            // Set the title of the x-axis and y-axis
-            cartesian.xAxis(0).title("Days")
+            // Update the chart title
+            updateChartTitle(cartesian, projectDate, monthOffset)
+
+            cartesian.xAxis(0).title(if (monthOffset < 0) "Weeks" else "Days")
             cartesian.yAxis(0).title("Hours")
-
-            // Enable tooltips for the chart
+            cartesian.yScale().ticks().interval(1)
             cartesian.tooltip().enabled(true)
-
-            // Set the chart in the AnyChartView
             anyChartView.setChart(cartesian)
         }
-    }
 
+        private fun updateChartTitle(cartesian: Cartesian, projectDate: String, monthOffset: Int) {
+            // Parse the project date to get the month name
+            val inputFormat = SimpleDateFormat("d/M/yyyy", Locale.ENGLISH)
+            val outputFormat = SimpleDateFormat("MMMM", Locale.ENGLISH)
+            val date = inputFormat.parse(projectDate)
+            val calendar = Calendar.getInstance()
+            calendar.time = date
+            calendar.add(Calendar.MONTH, monthOffset)
+            val monthName = outputFormat.format(calendar.time)
+
+            cartesian.title(if (monthOffset < 0) "$monthName Weeks Data" else "$monthName Days Data")
+        }
+    }
 }
+
+

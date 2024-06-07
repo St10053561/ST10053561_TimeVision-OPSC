@@ -11,17 +11,22 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
 import java.util.*
@@ -38,7 +43,7 @@ class TimesheetEntry : AppCompatActivity() {
     private lateinit var browseFilesButton: ImageView
     private lateinit var projectNameInput: TextInputEditText
     private lateinit var dateInput: TextInputEditText
-    private lateinit var categoryInput: TextInputEditText
+    private lateinit var categoryInput: Spinner
     private lateinit var startTimeInput: TextInputEditText
     private lateinit var endTimeInput: TextInputEditText
     private lateinit var minimumDailyHoursInput: EditText
@@ -91,7 +96,7 @@ class TimesheetEntry : AppCompatActivity() {
         submitButton.setOnClickListener {
             val projectName = projectNameInput.text.toString()
             val date = dateInput.text.toString()
-            val category = categoryInput.text.toString()
+            val category = categoryInput.selectedItem.toString()
             val startTime = startTimeInput.text.toString()
             val endTime = endTimeInput.text.toString()
             val minimumDailyHours = minimumDailyHoursInput.text.toString()
@@ -100,18 +105,99 @@ class TimesheetEntry : AppCompatActivity() {
             val workDescription = workDescriptionInput.text.toString()
 
             when {
-                projectName.isEmpty() -> Toast.makeText(this, "Please fill in the Project Name", Toast.LENGTH_SHORT).show()
-                startTime.isEmpty() -> Toast.makeText(this, "Please Pick The Start Time", Toast.LENGTH_SHORT).show()
-                category.isEmpty() -> Toast.makeText(this, "Please fill in the Category", Toast.LENGTH_SHORT).show()
-                startTime.isEmpty() -> Toast.makeText(this, "Please Pick The Start Time", Toast.LENGTH_SHORT).show()
-                endTime.isEmpty() -> Toast.makeText(this, "Please Pick The End Time", Toast.LENGTH_SHORT).show()
-                minimumDailyHours.isEmpty() -> Toast.makeText(this, "Please Pick the Minimum Daily Hours", Toast.LENGTH_SHORT).show()
-                maximumDailyHours.isEmpty() -> Toast.makeText(this, "Please Pick the Maximum Daily Hours", Toast.LENGTH_SHORT).show()
-                totalDuration.isEmpty() -> Toast.makeText(this, "Please fill in the Total Duration", Toast.LENGTH_SHORT).show()
-                workDescription.isEmpty() -> Toast.makeText(this, "Please fill in the Work Description", Toast.LENGTH_SHORT).show()
-                else -> saveToDatabase(projectName, date, category, startTime, endTime, minimumDailyHours, maximumDailyHours, totalDuration, workDescription, imageUri)
+                projectName.isEmpty() -> Toast.makeText(
+                    this,
+                    "Please fill in the Project Name",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                startTime.isEmpty() -> Toast.makeText(
+                    this,
+                    "Please Pick The Start Time",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                category.isEmpty() -> Toast.makeText(
+                    this,
+                    "Please fill in the Category",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                startTime.isEmpty() -> Toast.makeText(
+                    this,
+                    "Please Pick The Start Time",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                endTime.isEmpty() -> Toast.makeText(
+                    this,
+                    "Please Pick The End Time",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                minimumDailyHours.isEmpty() -> Toast.makeText(
+                    this,
+                    "Please Pick the Minimum Daily Hours",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                maximumDailyHours.isEmpty() -> Toast.makeText(
+                    this,
+                    "Please Pick the Maximum Daily Hours",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                totalDuration.isEmpty() -> Toast.makeText(
+                    this,
+                    "Please fill in the Total Duration",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                workDescription.isEmpty() -> Toast.makeText(
+                    this,
+                    "Please fill in the Work Description",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                else -> saveToDatabase(
+                    projectName,
+                    date,
+                    category,
+                    startTime,
+                    endTime,
+                    minimumDailyHours,
+                    maximumDailyHours,
+                    totalDuration,
+                    workDescription,
+                    imageUri
+                )
             }
         }
+
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        val database = FirebaseDatabase.getInstance().getReference("Categories")
+        database.child(currentUserId!!).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val categories = mutableListOf<String>()
+                for (categorySnapshot in dataSnapshot.children) {
+                    val category = categorySnapshot.getValue(Category::class.java)
+                    if (category != null) {
+                        categories.add(category.name)
+                    }
+                }
+                val adapter = ArrayAdapter(
+                    this@TimesheetEntry,
+                    android.R.layout.simple_spinner_item,
+                    categories
+                )
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                categoryInput.adapter = adapter
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Handle error
+            }
+        })
     }
 
     private fun showDatePicker(textInputEditText: TextInputEditText) {
@@ -120,10 +206,11 @@ class TimesheetEntry : AppCompatActivity() {
         val month = calendar.get(Calendar.MONTH)
         val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-        val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
-            val selectedDate = "${selectedMonth + 1}/$selectedDay/$selectedYear"
-            textInputEditText.setText(selectedDate)
-        }, year, month, day)
+        val datePickerDialog =
+            DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
+                val selectedDate = "${selectedMonth + 1}/$selectedDay/$selectedYear"
+                textInputEditText.setText(selectedDate)
+            }, year, month, day)
 
         datePickerDialog.show()
     }
@@ -154,8 +241,16 @@ class TimesheetEntry : AppCompatActivity() {
     }
 
     private fun openCamera() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_REQUEST_CODE
+            )
         } else {
             val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             if (takePictureIntent.resolveActivity(packageManager) != null) {
@@ -165,23 +260,31 @@ class TimesheetEntry : AppCompatActivity() {
     }
 
     private fun openGallery() {
-        val pickPhotoIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        val pickPhotoIntent =
+            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         pickPhotoIntent.type = "image/*"
         startActivityForResult(pickPhotoIntent, IMAGE_PICKER_REQUEST_CODE)
     }
 
-    private fun uploadImage(imageUri: Uri, onSuccess: () -> Unit) {
+    private fun uploadImage(imageUri: Uri, onSuccess: (String) -> Unit) {
         val progressDialog = ProgressDialog(this)
         progressDialog.setTitle("Uploading...")
         progressDialog.show()
 
-        val imageRef = storageReference.reference.child("images/${auth.currentUser?.uid}/${UUID.randomUUID()}")
+        val imageRef =
+            storageReference.reference.child("images/${auth.currentUser?.uid}/${UUID.randomUUID()}")
 
         val uploadTask = imageRef.putFile(imageUri)
         uploadTask.addOnSuccessListener {
-            progressDialog.dismiss()
-            onSuccess()
-            Toast.makeText(this@TimesheetEntry, "Image Successfully Uploaded", Toast.LENGTH_SHORT).show()
+            imageRef.downloadUrl.addOnSuccessListener { uri ->
+                progressDialog.dismiss()
+                onSuccess(uri.toString()) // Pass the image URL to the callback
+                Toast.makeText(
+                    this@TimesheetEntry,
+                    "Image Successfully Uploaded",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }.addOnFailureListener {
             progressDialog.dismiss()
             Toast.makeText(this@TimesheetEntry, "Failed To Upload Image", Toast.LENGTH_SHORT).show()
@@ -199,35 +302,48 @@ class TimesheetEntry : AppCompatActivity() {
                     val selectedImageUri: Uri? = data?.data
                     if (selectedImageUri != null) {
                         imageUri = selectedImageUri
-                        browseFilesButton.setImageURI(selectedImageUri) // Display selected image
+                        browseFilesButton.setImageURI(selectedImageUri)
                     }
                 }
 
                 CAMERA_REQUEST_CODE -> {
                     val photo: Bitmap = data?.extras?.get("data") as Bitmap
                     imageUri = getImageUri(photo)
-                    browseFilesButton.setImageBitmap(photo) // Display captured image
+                    browseFilesButton.setImageBitmap(photo)
                 }
             }
         }
     }
 
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             CAMERA_PERMISSION_REQUEST_CODE -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     openCamera()
                 } else {
-                    Toast.makeText(this, "Camera permission is required to take pictures", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Camera permission is required to take pictures",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
+
             WRITE_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // Handle the permission granted case if needed
+
                 } else {
-                    Toast.makeText(this, "Storage permission is required to save images", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Storage permission is required to save images",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -265,15 +381,23 @@ class TimesheetEntry : AppCompatActivity() {
         val timesheetEntryRef = databaseReference.child("TimeSheetEntries").child(userId).push()
 
         if (imageUri != null) {
-            uploadImage(imageUri) {
-                timesheetEntryData.imageUrl = imageUri.toString() // Save image URL to database
+            uploadImage(imageUri) { imageUrl ->
+                timesheetEntryData.imageUrl = imageUrl
                 timesheetEntryRef.setValue(timesheetEntryData).addOnCompleteListener { task ->
                     progressDialog.dismiss()
                     if (task.isSuccessful) {
-                        Toast.makeText(this@TimesheetEntry, "Timesheet Entry Saved", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@TimesheetEntry,
+                            "Timesheet Entry Saved",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         finish()
                     } else {
-                        Toast.makeText(this@TimesheetEntry, "Failed to Save Timesheet Entry", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@TimesheetEntry,
+                            "Failed to Save Timesheet Entry",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -281,10 +405,15 @@ class TimesheetEntry : AppCompatActivity() {
             timesheetEntryRef.setValue(timesheetEntryData).addOnCompleteListener { task ->
                 progressDialog.dismiss()
                 if (task.isSuccessful) {
-                    Toast.makeText(this@TimesheetEntry, "Timesheet Entry Saved", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@TimesheetEntry, "Timesheet Entry Saved", Toast.LENGTH_SHORT)
+                        .show()
                     finish()
                 } else {
-                    Toast.makeText(this@TimesheetEntry, "Failed to Save Timesheet Entry", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@TimesheetEntry,
+                        "Failed to Save Timesheet Entry",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -303,5 +432,4 @@ class TimesheetEntry : AppCompatActivity() {
         var workDescription: String? = null,
         var imageUrl: String? = null
     )
-
 }

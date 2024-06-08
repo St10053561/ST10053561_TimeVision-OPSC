@@ -16,11 +16,8 @@ To run the application on an Android device first, you need to download the proj
 
 Our Features We Added To The Application
 Automatic Time Tracker 
-
- 
 The Automatic Time Tracker works in the background without the need for any user interaction or intervention. The Automatic Time Tracker discreetly monitors when employees started and stop working on a project every single day for each project. The Automatic Time Tracker ensures a comprehensive and accurate account of employees time expenditure on specific projects and tasks.
 
 Absence Request
-   
 The Absence Request feature allows employees to request a form of absence from work for a certain period. They can select the duration of absence by choosing the day they want to be absent from work from the day of the end of their absences.  They can enter the reason for them wanting an absence and there is an additional section for entering more information regarding the request for absence if necessary. After submitting the request for absence their superior can review the request and approve it or reject it.
 

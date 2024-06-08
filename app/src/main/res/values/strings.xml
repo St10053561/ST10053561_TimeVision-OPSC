@@ -28,4 +28,8 @@
     <string name="enter_project_name">Enter Project Name</string>
     <string name="browse_files">Browse Files</string>
     <string name="picture_upload">Take Picture/Upload Image</string>
+    <string name="project_category">Project Category: </string>
+    <string name="project_description">Project Description: </string>
+    <string name="working_hours">Working Hours (Min - Max): </string>
+    <string name="project_start_date">Project Start Date: </string>
 </resources>

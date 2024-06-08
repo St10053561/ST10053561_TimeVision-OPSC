@@ -1,17 +1,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_time_vision_log"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ic_time_vision_logo_remove"
         android:supportsRtl="true"
         android:theme="@style/Theme.TimeVision_Application"
         tools:targetApi="31">
@@ -26,11 +32,13 @@
 
         <activity android:name=".ProjectDetailActivity" />
         <activity android:name=".DatePickerActivity" />
-        <activity android:name=".ChartsActivity"/>
+        <activity android:name=".ChartsActivity" />
         <activity android:name=".AddCategoryActivity" />
         <activity android:name=".TimeTrackerReport" />
-        <activity android:name=".AbsenceActivity"/>
-        <activity android:name=".Register" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".AbsenceActivity" />
+        <activity
+            android:name=".Register"
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".TimesheetEntry" />
         <activity android:name=".HomeScreen" />
     </application>

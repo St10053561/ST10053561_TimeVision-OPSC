@@ -1,0 +1,173 @@
+Index: app/src/main/java/com/example/timevision_application/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.timevision_application\r\n\r\nimport android.content.Intent\r\nimport android.os.Bundle\r\nimport android.view.View\r\nimport android.view.View.OnFocusChangeListener\r\nimport android.widget.Button\r\nimport android.widget.EditText\r\nimport android.widget.Toast\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport com.google.android.material.textfield.TextInputEditText\r\nimport com.google.android.material.textfield.TextInputLayout\r\nimport com.google.firebase.auth.FirebaseAuth\r\nimport com.google.firebase.database.DataSnapshot\r\nimport com.google.firebase.database.DatabaseError\r\nimport com.google.firebase.database.DatabaseReference\r\nimport com.google.firebase.database.FirebaseDatabase\r\nimport com.google.firebase.database.ValueEventListener\r\n\r\nclass MainActivity : AppCompatActivity(), OnFocusChangeListener {\r\n    // Firebase\r\n    private lateinit var mAuth: FirebaseAuth\r\n    private lateinit var mDatabase: DatabaseReference\r\n\r\n    // Declaring Input Fields\r\n    private lateinit var usernameInput: TextInputEditText\r\n    private lateinit var passwordInput: TextInputEditText\r\n    lateinit var loginBtn: Button\r\n\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContentView(R.layout.activity_main)\r\n\r\n        // Initialize Firebase Auth\r\n        mAuth = FirebaseAuth.getInstance()\r\n\r\n        // Initialize Firebase Database\r\n        mDatabase = FirebaseDatabase.getInstance().reference.child(\"users\")\r\n\r\n        // Initialize input fields\r\n        usernameInput = findViewById(R.id.usernameInput)\r\n        passwordInput = findViewById(R.id.passwordInput)\r\n\r\n        val registerButton = findViewById<Button>(R.id.register_btn)\r\n        registerButton.setOnClickListener {\r\n            val intent = Intent(this, Register::class.java)\r\n            startActivity(intent)\r\n        }\r\n\r\n        loginBtn = findViewById(R.id.login_btn)\r\n        loginBtn.setOnClickListener {\r\n            validateAndLogin()\r\n        }\r\n\r\n        // Set focus change listener\r\n        usernameInput.onFocusChangeListener = this\r\n        passwordInput.onFocusChangeListener = this\r\n    }\r\n\r\n    // Validate input fields and login\r\n    private fun validateAndLogin() {\r\n        val username = usernameInput.text.toString().trim()\r\n        val password = passwordInput.text.toString().trim()\r\n\r\n        if (validateUsername() && validatePassword()) {\r\n            loginUser(username, password)\r\n        }\r\n    }\r\n\r\n    //A method to validate the Username\r\n    private fun validateUsername(): Boolean {\r\n        var errorMessage: String? = null\r\n        val username: String = usernameInput.text.toString()\r\n\r\n        if (username.isNullOrEmpty()) {\r\n            errorMessage = \"A Username is Required\"\r\n        }\r\n        if (errorMessage != null) {\r\n            // Access the TextInputLayout associated with nameInput\r\n            val nameInputLayout = usernameInput.parent.parent as TextInputLayout\r\n            nameInputLayout.isErrorEnabled = true\r\n            nameInputLayout.error = errorMessage\r\n        }\r\n\r\n        return errorMessage == null\r\n    }\r\n\r\n    //A method to validate the Password\r\n    private fun validatePassword(): Boolean {\r\n        var errorMessage: String? = null\r\n        val password: String = passwordInput.text.toString()\r\n\r\n        if (password.isNullOrEmpty()) {\r\n            errorMessage = \"A Password is Required\"\r\n        }\r\n        if (errorMessage != null) {\r\n            // Access the TextInputLayout associated with nameInput\r\n            val nameInputLayout = passwordInput.parent.parent as TextInputLayout\r\n            nameInputLayout.isErrorEnabled = true\r\n            nameInputLayout.error = errorMessage\r\n        }\r\n        return errorMessage == null\r\n    }\r\n\r\n    override fun onFocusChange(view: View, hasFocus: Boolean) {\r\n        if (view != null) {\r\n            when (view.id) {\r\n                R.id.usernameInput -> {\r\n                    if (!hasFocus) {\r\n                        validateUsername() // Call validation function when losing focus\r\n                    }\r\n                }\r\n\r\n                R.id.passwordInput -> {\r\n                    if (!hasFocus) {\r\n                        validatePassword() // Call validation function when losing focus\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    // Firebase login\r\n    private fun loginUser(username: String, password: String) {\r\n        mAuth.signInWithEmailAndPassword(username, password)\r\n            .addOnCompleteListener(this) { task ->\r\n                if (task.isSuccessful) {\r\n                    // Sign in success, update UI with the signed-in user's information\r\n                    val user = mAuth.currentUser\r\n                    user?.let {\r\n                        getUserKey(user.uid)\r\n                    }\r\n                } else {\r\n                    // If sign in fails, display a message to the user.\r\n                    Toast.makeText(\r\n                        this,\r\n                        \"Authentication failed. ${task.exception?.message}\",\r\n                        Toast.LENGTH_SHORT\r\n                    ).show()\r\n                }\r\n            }\r\n    }\r\n\r\n    // Retrieve user key from Firebase Realtime Database\r\n    private fun getUserKey(userId: String) {\r\n        mDatabase.orderByChild(\"userId\").equalTo(userId).addListenerForSingleValueEvent(object :\r\n            ValueEventListener {\r\n            override fun onDataChange(dataSnapshot: DataSnapshot) {\r\n                if (dataSnapshot.exists()) {\r\n                    // User found, retrieve the key (value)\r\n                    for (snapshot in dataSnapshot.children) {\r\n                        val userKey = snapshot.key\r\n                        moveToHomeScreen(userKey)\r\n                    }\r\n                } else {\r\n                    // User not found\r\n                    Toast.makeText(applicationContext, \"User Does Not Exists\", Toast.LENGTH_SHORT)\r\n                        .show()\r\n                }\r\n            }\r\n\r\n            override fun onCancelled(databaseError: DatabaseError) {\r\n                // Handle errors here\r\n            }\r\n        })\r\n    }\r\n\r\n    // Move to HomeScreen activity and pass user key\r\n    private fun moveToHomeScreen(userKey: String?) {\r\n        val intent = Intent(this, HomeScreen::class.java)\r\n        intent.putExtra(\"userKey\", userKey)\r\n        startActivity(intent)\r\n        finish() // Optionally finish the current activity\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/timevision_application/MainActivity.kt b/app/src/main/java/com/example/timevision_application/MainActivity.kt
+--- a/app/src/main/java/com/example/timevision_application/MainActivity.kt	
++++ b/app/src/main/java/com/example/timevision_application/MainActivity.kt	
+@@ -121,25 +121,26 @@
+     }
+ 
+     // Firebase login
+-    private fun loginUser(username: String, password: String) {
+-        mAuth.signInWithEmailAndPassword(username, password)
+-            .addOnCompleteListener(this) { task ->
+-                if (task.isSuccessful) {
+-                    // Sign in success, update UI with the signed-in user's information
+-                    val user = mAuth.currentUser
+-                    user?.let {
+-                        getUserKey(user.uid)
+-                    }
+-                } else {
+-                    // If sign in fails, display a message to the user.
+-                    Toast.makeText(
+-                        this,
+-                        "Authentication failed. ${task.exception?.message}",
+-                        Toast.LENGTH_SHORT
+-                    ).show()
+-                }
+-            }
+-    }
++// Firebase login
++private fun loginUser(email: String, password: String) {
++    mAuth.signInWithEmailAndPassword(email, password)
++        .addOnCompleteListener(this) { task ->
++            if (task.isSuccessful) {
++                // Sign in success, update UI with the signed-in user's information
++                val user = mAuth.currentUser
++                user?.let {
++                    getUserKey(user.uid)
++                }
++            } else {
++                // If sign in fails, display a message to the user.
++                Toast.makeText(
++                    this,
++                    "Authentication failed. ${task.exception?.message}",
++                    Toast.LENGTH_LONG
++                ).show()
++            }
++        }
++}
+ 
+     // Retrieve user key from Firebase Realtime Database
+     private fun getUserKey(userId: String) {
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"GradleSettings\">\r\n    <option name=\"linkedExternalProjectsSettings\">\r\n      <GradleProjectSettings>\r\n        <option name=\"externalProjectPath\" value=\"$PROJECT_DIR$\" />\r\n        <option name=\"resolveExternalAnnotations\" value=\"false\" />\r\n      </GradleProjectSettings>\r\n    </option>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+--- a/.idea/gradle.xml	
++++ b/.idea/gradle.xml	
+@@ -4,6 +4,13 @@
+     <option name="linkedExternalProjectsSettings">
+       <GradleProjectSettings>
+         <option name="externalProjectPath" value="$PROJECT_DIR$" />
++        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
++        <option name="modules">
++          <set>
++            <option value="$PROJECT_DIR$" />
++            <option value="$PROJECT_DIR$/app" />
++          </set>
++        </option>
+         <option name="resolveExternalAnnotations" value="false" />
+       </GradleProjectSettings>
+     </option>
+Index: app/google-services.json
+===================================================================
+diff --git a/app/google-services.json b/app/google-services.json
+new file mode 100644
+--- /dev/null	
++++ b/app/google-services.json	
+@@ -0,0 +1,30 @@
++{
++  "project_info": {
++    "project_number": "52727235322",
++    "firebase_url": "https://timekeeper-3b842-default-rtdb.firebaseio.com",
++    "project_id": "timekeeper-3b842",
++    "storage_bucket": "timekeeper-3b842.appspot.com"
++  },
++  "client": [
++    {
++      "client_info": {
++        "mobilesdk_app_id": "1:52727235322:android:3e2598664171df8373ff43",
++        "android_client_info": {
++          "package_name": "com.example.timevision_application"
++        }
++      },
++      "oauth_client": [],
++      "api_key": [
++        {
++          "current_key": "AIzaSyC_TvqCmdOK8k5NqVPOgXf2sEf8nF2HMbU"
++        }
++      ],
++      "services": {
++        "appinvite_service": {
++          "other_platform_oauth_client": []
++        }
++      }
++    }
++  ],
++  "configuration_version": "1"
++}
+\ No newline at end of file
+Index: .idea/compiler.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/compiler.xml	
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="CompilerConfiguration">
++    <bytecodeTargetLevel target="17" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/kotlinc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/kotlinc.xml b/.idea/kotlinc.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/kotlinc.xml	
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="KotlinJpsPluginSettings">
++    <option name="version" value="1.9.0" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/migrations.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/migrations.xml b/.idea/migrations.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/migrations.xml	
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectMigrations">
++    <option name="MigrateToGradleLocalJavaHome">
++      <set>
++        <option value="$PROJECT_DIR$" />
++      </set>
++    </option>
++  </component>
++</project>
+\ No newline at end of file

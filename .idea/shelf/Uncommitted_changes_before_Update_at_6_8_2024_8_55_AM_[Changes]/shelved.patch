@@ -1,0 +1,54 @@
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\">\r\n\r\n    <uses-permission android:name=\"android.permission.CAMERA\" />\r\n    <uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" />\r\n    <uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" android:maxSdkVersion=\"28\" />\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\r\n        android:fullBackupContent=\"@xml/backup_rules\"\r\n        android:icon=\"@mipmap/ic_launcher\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/Theme.TimeVision_Application\"\r\n        tools:targetApi=\"31\">\r\n        <activity\r\n            android:name=\".MainActivity\"\r\n            android:exported=\"true\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n\r\n        <activity android:name=\".ProjectDetailActivity\" />\r\n        <activity android:name=\".DatePickerActivity\" />\r\n        <activity android:name=\".ChartsActivity\"/>\r\n        <activity android:name=\".AddCategoryActivity\" />\r\n        <activity android:name=\".TimeTrackerReport\" />\r\n        <activity android:name=\".AbsenceActivity\"/>\r\n        <activity android:name=\".Register\" android:windowSoftInputMode=\"adjustResize\" />\r\n        <activity android:name=\".TimesheetEntry\" />\r\n        <activity android:name=\".HomeScreen\" />\r\n    </application>\r\n</manifest>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision 6f0cf52331f408fbf48e9ff7a044ae5a04ec3082)
++++ b/app/src/main/AndroidManifest.xml	(date 1717829756910)
+@@ -1,17 +1,23 @@
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:tools="http://schemas.android.com/tools">
+ 
++    <uses-feature
++        android:name="android.hardware.camera"
++        android:required="false" />
++
+     <uses-permission android:name="android.permission.CAMERA" />
+     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
++    <uses-permission
++        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
++        android:maxSdkVersion="28" />
+ 
+     <application
+         android:allowBackup="true"
+         android:dataExtractionRules="@xml/data_extraction_rules"
+         android:fullBackupContent="@xml/backup_rules"
+-        android:icon="@mipmap/ic_launcher"
++        android:icon="@drawable/ic_time_vision_log"
+         android:label="@string/app_name"
+-        android:roundIcon="@mipmap/ic_launcher_round"
++        android:roundIcon="@drawable/ic_time_vision_logo_remove"
+         android:supportsRtl="true"
+         android:theme="@style/Theme.TimeVision_Application"
+         tools:targetApi="31">
+@@ -26,11 +32,13 @@
+ 
+         <activity android:name=".ProjectDetailActivity" />
+         <activity android:name=".DatePickerActivity" />
+-        <activity android:name=".ChartsActivity"/>
++        <activity android:name=".ChartsActivity" />
+         <activity android:name=".AddCategoryActivity" />
+         <activity android:name=".TimeTrackerReport" />
+-        <activity android:name=".AbsenceActivity"/>
+-        <activity android:name=".Register" android:windowSoftInputMode="adjustResize" />
++        <activity android:name=".AbsenceActivity" />
++        <activity
++            android:name=".Register"
++            android:windowSoftInputMode="adjustResize" />
+         <activity android:name=".TimesheetEntry" />
+         <activity android:name=".HomeScreen" />
+     </application>

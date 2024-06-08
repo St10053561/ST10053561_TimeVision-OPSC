@@ -14,11 +14,6 @@ On Android Device
 To run the application on an Android device first, you need to download the project, for example, you can download the project file on GitHub. Unzip (Extra) the project, take the extracted project and place it in the folder where you keep your Android studio projects. Open Android Studio and go to file then select open and select the project from the Android Studio folder. After the project successfully loads (you might need to accept the option to correct the SDK). Take your Android device and go to settings then go to about device. After that go to the device number and click on it multiple times (about 10 times) until you see a message popping up telling you you are now in developer mode or are one click away from developer mode. After that take a data cable and connect your phone to your computer. After that you will get a pop-up asking you if you want to allow USB debugging, click on Allow after that click on the green play button at the top centre of the Android Studio window. This will install and start up the application on your Android device
 
 
-
-
-
-
-
 Our Features We Added To The Application
 Automatic Time Tracker 
 
